@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0b0d17">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <title>SENAI X-Ray | Laboratório de realidade mista</title>
   <link rel="stylesheet" href="/src/style.css">
 </head>
@@ -32,16 +33,37 @@
         </figure>
       </section>
       <p id="status" role="status">Verificando realidade mista…</p>
-      <form id="editor" hidden>
-        <h2>Cadastro de máquinas</h2><p>Salvo neste navegador. Para o evento, configure o catálogo no Quest.</p>
-        <label>Ficha para editar<select id="edit-machine"><option value="">Nova máquina</option></select></label>
-        <label>Nome da máquina<input name="name" required maxlength="70"></label>
-        <label>Ficha técnica<textarea name="info" placeholder="Modelo, série e especificações"></textarea></label>
-        <label>Leituras simuladas<textarea name="readings" placeholder="Uma leitura por linha, com sua unidade"></textarea></label>
-        <label>Manutenção simulada<input name="procedure" placeholder="Nome do procedimento"></label>
-        <label>Etapas do roteiro<textarea name="steps" placeholder="Uma etapa por linha"></textarea></label>
-        <button type="submit">Salvar máquina</button> <button id="remove" type="button" hidden>Excluir máquina</button> <button type="button" id="cancel">Fechar</button>
+      <form id="editor" hidden novalidate aria-labelledby="wizard-title">
+        <span class="eyebrow">ADMINISTRAÇÃO · CATÁLOGO LOCAL</span>
+        <h2 id="wizard-title">Cadastro de máquinas</h2>
+        <label>Ficha para editar<select id="edit-machine"><option value="">＋ Criar nova máquina</option></select></label>
+        <ol class="wizard-progress" aria-label="Etapas do cadastro"><li>1 · Informações</li><li>2 · Diagnóstico</li><li>3 · Manutenção</li></ol>
+        <section class="wizard-page">
+          <h3 tabindex="-1">Informações</h3>
+          <p>Dê um nome à placa que o visitante verá e acrescente os dados da ficha técnica.</p>
+          <label>Nome da máquina <small>(obrigatório)</small><input id="machine-name" required maxlength="70" placeholder="Ex.: Creality K2"></label>
+          <div id="spec-list"></div>
+          <button type="button" id="add-spec">＋ Adicionar especificação</button>
+        </section>
+        <section class="wizard-page" hidden>
+          <h3 tabindex="-1">Diagnóstico</h3>
+          <p>Escolha quais leituras o visitante verá e informe um valor simulado para cada uma.</p>
+          <div id="metric-list"></div>
+          <button type="button" id="add-metric">＋ Adicionar leitura</button>
+        </section>
+        <section class="wizard-page" hidden>
+          <h3 tabindex="-1">Manutenção</h3>
+          <p>Monte o roteiro de uma atividade simulada. Cada etapa será uma tela no painel do visitante.</p>
+          <label>Nome do procedimento<input id="procedure" placeholder="Ex.: Inspeção visual simulada"></label>
+          <div id="step-list"></div>
+          <button type="button" id="add-step">＋ Adicionar etapa</button>
+        </section>
+        <div class="wizard-nav">
+          <button type="button" id="back">Voltar</button>
+          <button type="submit" id="advance">Continuar</button>
+        </div>
         <p id="edit-status" role="status"></p>
+        <div class="wizard-tools"><small>Salvo neste navegador.</small><button id="remove" type="button" hidden>Excluir ficha</button><button type="button" id="cancel">Cancelar</button></div>
       </form>
       <article id="sample" hidden tabindex="-1"></article>
     </main>

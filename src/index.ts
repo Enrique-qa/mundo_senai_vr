@@ -1,45 +1,15 @@
-import { loadCatalog, saveCatalog, stationText, type Equipment } from './equipment';
+import { setupWizard } from './wizard';
+import { loadCatalog, stationText } from './equipment';
 const sample = document.querySelector<HTMLElement>('#sample')!;
 const status = document.querySelector<HTMLElement>('#status')!;
 const button = (id: string) => document.querySelector<HTMLButtonElement>('#' + id)!;
 let step = 0;
 const catalog = loadCatalog();
 const machines = document.querySelector<HTMLSelectElement>('#machines')!;
-const editor = document.querySelector<HTMLFormElement>('#editor')!;
-const editMachine = document.querySelector<HTMLSelectElement>('#edit-machine')!;
-for (const machine of catalog) {
-  machines.add(new Option(machine.name, machine.id));
-  editMachine.add(new Option(machine.name, machine.id));
-}
+for (const machine of catalog) machines.add(new Option(machine.name, machine.id));
 if (!catalog.length) machines.add(new Option('Nenhuma máquina cadastrada',''));
 machines.disabled = button('preview').disabled = !catalog.length;
-const fields = ['name','info','readings','procedure','steps'] as const;
-function field(name: string) { return editor.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement; }
-function fillEditor() {
-  const machine = catalog.find(item => item.id === editMachine.value);
-  for (const key of fields) field(key).value = key === 'steps' ? machine?.steps.join('\n') ?? '' : machine?.[key] ?? '';
-  button('remove').hidden = !machine;
-}
-function persist(next: Equipment[]) {
-  try { saveCatalog(next); location.reload(); }
-  catch { document.querySelector('#edit-status')!.textContent = 'O navegador não permitiu salvar o catálogo.'; }
-}
-button('manage').onclick = () => { editor.hidden = false; fillEditor(); editMachine.focus(); };
-button('cancel').onclick = () => { editor.hidden = true; button('manage').focus(); };
-editMachine.onchange = fillEditor;
-editor.onsubmit = event => {
-  event.preventDefault();
-  const existing = catalog.find(item => item.id === editMachine.value);
-  const name = field('name').value.trim();
-  if (!name) { field('name').focus(); return; }
-  const machine: Equipment = { ...existing, id: existing?.id ?? crypto.randomUUID(), name,
-    info: field('info').value.trim(), readings: field('readings').value.trim(),
-    procedure: field('procedure').value.trim(), steps: field('steps').value.split('\n').map(s => s.trim()).filter(Boolean) };
-  persist(existing ? catalog.map(item => item === existing ? machine : item) : [...catalog,machine]);
-};
-button('remove').onclick = () => {
-  if (confirm('Excluir esta ficha do catálogo deste navegador?')) persist(catalog.filter(item => item.id !== editMachine.value));
-};
+setupWizard(catalog);
 machines.onchange = () => { step = 0; if (!sample.hidden) preview(); };
 function preview(tab = 0, feedback = '') {
   const machine = catalog.find(item => item.id === machines.value);
