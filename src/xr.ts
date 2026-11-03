@@ -1,7 +1,7 @@
 import { World, createSystem, UIKitMLAsset, InputComponent, RayInteractable, Vector3 } from '@iwsdk/core';
 import { Text } from '@pmndrs/uikit';
 import options from 'virtual:iwsdk-project';
-import { stationText, type Equipment } from './equipment';
+import { fieldsFor, proceduresFor, type Equipment } from './equipment';
 
 const fontFamilies = { Barlow: { 600: import.meta.env.BASE_URL + 'fonts/barlow-pt.json' } };
 function styleText(asset: UIKitMLAsset) {
@@ -41,6 +41,14 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
   let operator = false;
   class Station extends createSystem({}) {
     private selected = 0;
+    private route = -1;
+    private compact = markers.map(()=>false);
+    private setCompact(index: number, compact: boolean) {
+      if (this.compact[index] === compact) return;
+      this.compact[index] = compact;
+      markers[index].requireElementById('inspect').setProperties({display:compact?'none':'flex'});
+      markers[index].requireElementById('dot').setProperties({display:compact?'flex':'none'});
+    }
     private placing = -1;
     private placed = new Set<string>();
     private page = 0;
@@ -82,9 +90,9 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       listen(menu,'next',()=>{ if (menu.visible && (this.page+1)*3<catalog.length) { this.page++; this.renderMenu(); } });
       listen(menu,'visit',()=>{ if (menu.visible && this.placed.size) { menu.visible = false; this.showMarkers(); } });
       markers.forEach((marker,index) => listen(marker, 'inspect', () => {
-        if (!world.session || this.placing !== -1 || !marker.visible || performance.now() < this.openAfter) return;
+        if (!world.session || this.placing !== -1 || this.compact[index] || !marker.visible || performance.now() < this.openAfter) return;
         this.selected = index;
-        this.tab = this.step = 0;
+        this.tab = this.step = 0; this.route = -1;
         this.feedback = '';
         panel.position.copy(marker.position);
         panel.position.y += 0.35;
@@ -92,11 +100,15 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         panel.visible = true;
         this.renderPanel();
       }));
-      for (let i=0;i<3;i++) listen(panel, 'tab'+i, () => { this.tab = i; this.renderPanel(); });
+      for (let i=0;i<3;i++) listen(panel, 'tab'+i, () => { this.tab = i; this.step = 0; this.route = -1; this.renderPanel(); });
+      for (let i=0;i<3;i++) listen(panel,'route'+i,()=>{
+        this.route = this.step*3+i; this.step = 0; this.renderPanel();
+      });
+      listen(panel,'routes',()=>{ this.route = -1; this.step = 0; this.renderPanel(); });
       for (let i=0;i<6;i++) listen(panel, 'action'+i, () => {
         const machine = catalog[this.selected];
         if (i<2) this.feedback = machine.quiz?.feedback[i] ?? '';
-        if (i===2 || i===3) this.step = Math.max(0,Math.min(machine.steps.length-1,this.step+(i===3?1:-1)));
+        if (i===2 || i===3) this.step = Math.max(0,this.step+(i===3?1:-1));
         if (i>=4) {
           panel.visible = false;
           this.showMarkers();
@@ -109,6 +121,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       markers.forEach((marker,i) => { marker.visible = !operator || this.placed.has(catalog[i].id); });
     }
     private beginPlacement(index: number) {
+      this.setCompact(index,false);
       this.placing = index;
       this.previousPosition.copy(markers[index].position);
       this.placementReady = false;
@@ -153,9 +166,30 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         borderColor: i===this.tab ? '#ffe651' : '#435060',
         backgroundColor: i===this.tab ? '#38321b' : '#1a2131'
       });
-      label(panel,'title',machine.name);
-      label(panel,'copy',stationText(machine,this.tab,this.step,this.feedback));
-      const show = [this.tab===1 && !!machine.quiz,this.tab===1 && !!machine.quiz,this.tab===2 && this.step>0,this.tab===2 && this.step<machine.steps.length-1,true,operator];
+      const routes = proceduresFor(machine);
+      const selected = this.tab===2 ? routes[this.route] : undefined;
+      const fields = this.tab<2 ? fieldsFor(machine,this.tab) : [];
+      const list = this.tab===2 && !selected;
+      const count = selected ? selected.steps.length : Math.ceil((list?routes.length:fields.length)/3);
+      this.step = Math.max(0,Math.min(this.step,count-1));
+      label(panel,'machine','SENAI X-RAY   /   '+machine.name);
+      label(panel,'title',selected?.title ?? ['Informações','Diagnóstico simulado','Manutenções'][this.tab]);
+      panel.requireElementById('photo').setProperties({src:machine.photo,display:machine.photo?'flex':'none'});
+      for (let i=0;i<3;i++) {
+        const field = fields[this.step*3+i];
+        panel.requireElementById('field'+i).setProperties({display:field?'flex':'none'});
+        if (field) { label(panel,'key'+i,field.key); label(panel,'val'+i,field.value); }
+        const route = list && routes[this.step*3+i];
+        panel.requireElementById('route'+i).setProperties({display:route?'flex':'none'});
+        if (route) label(panel,'route'+i,route.title);
+      }
+      const question = this.tab===1 && machine.quiz;
+      const copy = selected ? 'Etapa '+(this.step+1)+' de '+count+'\n'+selected.steps[this.step]
+        : question ? this.feedback || question.question : !count ? 'Nenhum conteúdo cadastrado nesta seção.' : '';
+      panel.requireElementById('copy').setProperties({display:copy?'flex':'none'});
+      if (copy) label(panel,'copy',copy);
+      panel.requireElementById('routes').setProperties({display:selected?'flex':'none'});
+      const show = [!!question,!!question,this.step>0,this.step+1<count,true,operator];
       show.forEach((visible,i) => panel.requireElementById('action'+i).setProperties({display:visible?'flex':'none'}));
       machine.quiz?.choices.forEach((choice,i) => label(panel,'action'+i,choice));
     }
@@ -208,7 +242,15 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
           this.openMenu();
         }
       }
-      for (const marker of markers) if (marker.visible) marker.lookAt(this.head);
+      for (let i=0;i<markers.length;i++) {
+        const marker = markers[i];
+        if (!marker.visible) continue;
+        if (this.placing < 0) {
+          const distance = marker.position.distanceToSquared(this.head);
+          this.setCompact(i, distance > (this.compact[i] ? 2.5**2 : 3**2));
+        }
+        marker.lookAt(this.head);
+      }
       if (panel.visible) panel.lookAt(this.head);
     }
   }

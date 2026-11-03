@@ -1,5 +1,5 @@
 import { setupWizard } from './wizard';
-import { loadCatalog, stationText } from './equipment';
+import { loadCatalog, fieldsFor, proceduresFor } from './equipment';
 const sample = document.querySelector<HTMLElement>('#sample')!;
 const status = document.querySelector<HTMLElement>('#status')!;
 const button = (id: string) => document.querySelector<HTMLButtonElement>('#' + id)!;
@@ -22,35 +22,55 @@ function showPlacement(placed: ReadonlySet<string>) {
 showPlacement(new Set());
 setupWizard(catalog);
 machines.onchange = () => { step = 0; if (!sample.hidden) preview(); };
-function preview(tab = 0, feedback = '') {
+function preview(tab = 0, feedback = '', route = -1) {
   const machine = catalog.find(item => item.id === machines.value);
   if (!machine) return;
   sample.hidden = false;
   sample.replaceChildren();
-  const title = document.createElement('h2');
-  title.textContent = machine.name;
-  sample.append(title);
-  function control(label: string, action: () => void) {
-    const el = document.createElement('button');
-    el.textContent = label;
-    el.onclick = action;
-    sample.append(el);
-    return el;
+  function text(parent: HTMLElement, tag: string, value: string) {
+    const el = document.createElement(tag); el.textContent = value; parent.append(el); return el;
   }
-  ['Informações', 'Diagnóstico', 'Manutenção'].forEach((label,i) => {
-    const tabButton = control(label, () => {
-      preview(i);
-      sample.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.focus();
-    });
-    tabButton.setAttribute('aria-pressed', String(i === tab));
-  });
-  const paragraph = document.createElement('p');
-  paragraph.textContent = stationText(machine, tab, step, feedback);
-  sample.append(paragraph);
-  if (tab === 1) machine.quiz?.choices.forEach((label,i) => control(label, () => preview(1,machine.quiz!.feedback[i])));
-  if (tab === 2 && step > 0) control('Anterior', () => { step--; preview(2); });
-  if (tab === 2 && step < machine.steps.length-1) control('Próximo', () => { step++; preview(2); });
-  control('Fechar', () => { sample.hidden = true; button('preview').focus(); });
+  function control(parent: HTMLElement, title: string, fn: () => void) {
+    const el = document.createElement('button'); el.textContent = title; el.onclick = fn; parent.append(el); return el;
+  }
+  const tabs = ['Informações','Diagnóstico','Manutenções'];
+  const routes = proceduresFor(machine);
+  const selected = routes[route];
+  text(sample,'small','SENAI X-RAY   /   '+machine.name);
+  text(sample,'h2',selected?.title ?? tabs[tab]);
+  const body = document.createElement('div'); body.className = 'sheet-body'; sample.append(body);
+  const content = document.createElement('div'); body.append(content);
+  if (machine.photo) {
+    const image = document.createElement('img'); image.src = machine.photo; image.alt = machine.name;
+    body.append(image); body.classList.add('with-photo');
+  }
+  if (tab < 2) {
+    if (tab === 1) text(content,'small','CENÁRIO SIMULADO');
+    const grid = document.createElement('dl'); content.append(grid);
+    const fields = fieldsFor(machine,tab);
+    for (const f of fields) {
+      const cell = document.createElement('div'); grid.append(cell);
+      text(cell,'dt',f.key); text(cell,'dd',f.value);
+    }
+    if (!fields.length) text(content,'p','Nenhuma informação cadastrada nesta seção.');
+    if (tab === 1 && machine.quiz) {
+      text(content,'p',feedback || machine.quiz.question);
+      machine.quiz.choices.forEach((choice,i)=>control(content,choice,()=>preview(1,machine.quiz!.feedback[i])));
+    }
+  } else if (selected) {
+    text(content,'small','ETAPA '+(step+1)+' DE '+selected.steps.length);
+    text(content,'p',selected.steps[step]);
+    if (step>0) control(content,'Anterior',()=>{step--;preview(2,'',route);});
+    if (step+1<selected.steps.length) control(content,'Próximo',()=>{step++;preview(2,'',route);});
+    control(content,'Todos os procedimentos',()=>preview(2));
+  } else {
+    text(content,'small','ROTEIROS SIMULADOS');
+    routes.forEach((r,i)=>control(content,r.title,()=>{step=0;preview(2,'',i);}).className='route-choice');
+    if (!routes.length) text(content,'p','Nenhum procedimento cadastrado.');
+  }
+  const nav = document.createElement('nav'); nav.setAttribute('aria-label','Seções da ficha'); sample.append(nav);
+  tabs.forEach((title,i)=>control(nav,title,()=>{preview(i);sample.querySelector<HTMLButtonElement>('[aria-pressed=true]')?.focus();}).setAttribute('aria-pressed',String(i===tab)));
+  control(nav,'Fechar',()=>{sample.hidden=true;button('preview').focus();});
 }
 button('preview').onclick = () => { step = 0; preview(); sample.focus(); };
 async function start() {

@@ -54,3 +54,7 @@ Os textos imersivos usam o atlas local Barlow SemiBold com glifos portugueses. A
 - [ ] Quest físico, fim e reinício de sessão, perda de rastreamento e troca de visitante.
 - [ ] P1 após P0 em campo, validar o posicionamento de duas ou mais máquinas no mesmo ambiente.
 
+
+## Fichas e distância de leitura
+Em **Gerenciar máquinas**, inclua uma foto opcional, pares de especificação e valor, diagnóstico simulado e procedimentos com suas próprias etapas. A pergunta de diagnóstico também pode ser editada ou removida. A foto é reduzida no navegador e salva com a ficha neste dispositivo.
+Na visita, a seção **Manutenções** abre a lista de procedimentos. No Quest, as especificações, leituras e listas longas são paginadas. Ao se afastar mais de 3 m, o botão dá lugar a um ponto amarelo; ao voltar a menos de 2,5 m, o nome e a seleção reaparecem. O posicionamento pelo administrador mantém a identificação visível.

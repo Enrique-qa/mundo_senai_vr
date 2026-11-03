@@ -1,7 +1,7 @@
-import { saveCatalog, type Equipment } from './equipment';
+import { saveCatalog, proceduresFor, type Equipment, type Procedure } from './equipment';
 
 type Pair = [string, string];
-const metrics = ['Temperatura', 'Velocidade', 'Pressão', 'Tensão', 'Corrente', 'Potência', 'Vibração'];
+const metrics = ['Temperatura', 'Velocidade', 'Pressão', 'Tensão', 'Corrente', 'Potência', 'Vibração', 'Status', 'Problema'];
 const hints = ['Ex.: 42 °C', 'Ex.: 800 rpm', 'Ex.: 6 bar', 'Ex.: 220 V', 'Ex.: 2 A', 'Ex.: 500 W', 'Ex.: 3 mm/s'];
 
 function legacyPairs(raw: string, readings: boolean): Pair[] {
@@ -31,8 +31,8 @@ export function setupWizard(catalog: Equipment[]) {
   const form = get<HTMLFormElement>('editor');
   const selector = get<HTMLSelectElement>('edit-machine');
   const name = get<HTMLInputElement>('machine-name');
-  const procedure = get<HTMLInputElement>('procedure');
-  const specs = get('spec-list'), readings = get('metric-list'), steps = get('step-list');
+  const procedures = get('procedures');
+  const specs = get('spec-list'), readings = get('metric-list');
   const pages = [...form.querySelectorAll<HTMLElement>('.wizard-page')];
   const navigation = [...form.querySelectorAll<HTMLButtonElement>('.wizard-progress button')];
   navigation.forEach((button,i) => { button.onclick = () => show(i); });
@@ -88,7 +88,7 @@ export function setupWizard(catalog: Equipment[]) {
     list.append(row);
     if (focus) row.querySelector<HTMLElement>('input,select')?.focus();
   }
-  function refreshSteps() {
+  function refreshSteps(steps: HTMLElement) {
     [...steps.children].forEach((row,i) => {
       row.querySelector('span')!.textContent = 'Etapa ' + (i+1);
       const buttons = row.querySelectorAll('button');
@@ -96,7 +96,7 @@ export function setupWizard(catalog: Equipment[]) {
       buttons[1].disabled = i===steps.children.length-1;
     });
   }
-  function addStep(text = '', focus = false) {
+  function addStep(steps: HTMLElement, text = '', focus = false) {
     const row = document.createElement('div');
     row.className = 'step-row';
     const label = document.createElement('label');
@@ -109,27 +109,76 @@ export function setupWizard(catalog: Equipment[]) {
       if (!other) return;
       if (down) other.after(row); else other.before(row);
       dirty = true;
-      refreshSteps();
+      refreshSteps(steps);
       input.focus();
     };
     row.append(label,makeButton('Subir',()=>move(false)),makeButton('Descer',()=>move(true)),
-      makeButton('Remover',()=>{ row.remove(); dirty = true; refreshSteps(); }));
+      makeButton('Remover',()=>{ row.remove(); dirty = true; refreshSteps(steps); }));
     steps.append(row);
-    refreshSteps();
+    refreshSteps(steps);
     if (focus) input.focus();
   }
 
+  function addProcedure(item: Procedure = {title:'', steps:[]}) {
+    const box = document.createElement('fieldset');
+    const title = document.createElement('input');
+    title.value = item.title;
+    title.placeholder = 'Ex.: inspeção da mesa';
+    labeled(box,'Nome do procedimento',title);
+    const entries = document.createElement('div');
+    entries.className = 'steps';
+    box.append(entries,makeButton('＋ Adicionar etapa',()=>{ addStep(entries,'',true); dirty = true; }),
+      makeButton('Remover procedimento',()=>{ if (!title.value || confirm('Remover este procedimento da ficha?')) { box.remove(); dirty = true; } }));
+    for (const step of item.steps.length ? item.steps : ['']) addStep(entries,step);
+    procedures.append(box);
+    return title;
+  }
+  let photo = '';
+  const file = get<HTMLInputElement>('photo-file');
+  const thumbnail = get<HTMLImageElement>('photo-preview');
+  let revision = 0;
+  function setPhoto(src: string) {
+    revision++;
+    photo = src; file.value = ''; file.setCustomValidity('');
+    if (src) thumbnail.src = src; else thumbnail.removeAttribute('src');
+    thumbnail.hidden = get('clear-photo').hidden = !src;
+    get<HTMLButtonElement>('advance').disabled = false;
+  }
+  file.onchange = async () => {
+    const selected = file.files?.[0]; if (!selected) return;
+    const token = ++revision;
+    get<HTMLButtonElement>('advance').disabled = true;
+    try {
+      const bitmap = await createImageBitmap(selected);
+      const ratio = Math.min(1,640/Math.max(bitmap.width,bitmap.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1,Math.round(bitmap.width*ratio)); canvas.height = Math.max(1,Math.round(bitmap.height*ratio));
+      const ctx = canvas.getContext('2d')!;
+      ctx.fillStyle = '#111725'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(bitmap,0,0,canvas.width,canvas.height); bitmap.close();
+      if (token === revision) { setPhoto(canvas.toDataURL('image/jpeg',0.78)); dirty = true; }
+    } catch {
+      if (token === revision) { file.value = ''; get('edit-status').textContent = 'Não foi possível abrir a imagem. Selecione um arquivo JPG, PNG ou WebP.'; }
+    } finally { if (token === revision) get<HTMLButtonElement>('advance').disabled = false; }
+  };
+  get('clear-photo').onclick = () => { setPhoto(''); dirty = true; };
   function load() {
     current = catalog.find(item => item.id === selector.value);
     name.value = current?.name ?? '';
-    procedure.value = current?.procedure ?? '';
-    specs.replaceChildren(); readings.replaceChildren(); steps.replaceChildren();
+    procedures.replaceChildren(); specs.replaceChildren(); readings.replaceChildren();
+    for (const p of current ? proceduresFor(current) : []) addProcedure(p);
+    if (!procedures.childElementCount) addProcedure();
+    setPhoto(current?.photo ?? '');
+    get<HTMLInputElement>('question').value = current?.quiz?.question ?? '';
+    for (let i=0;i<2;i++) {
+      get<HTMLInputElement>('choice'+i).value = current?.quiz?.choices[i] ?? '';
+      get<HTMLInputElement>('reply'+i).value = current?.quiz?.feedback[i] ?? '';
+    }
+    get<HTMLDetailsElement>('quiz-editor').open = !!current?.quiz;
     for (const pair of legacyPairs(current?.info ?? '',false)) addPair(specs,pair);
     for (const pair of legacyPairs(current?.readings ?? '',true)) addPair(readings,pair);
-    for (const step of current?.steps ?? []) addStep(step);
     if (!specs.childElementCount) addPair(specs);
     if (!readings.childElementCount) addPair(readings);
-    if (!steps.childElementCount) addStep();
     get('remove').hidden = !current;
     get('edit-status').textContent = '';
     dirty = false;
@@ -160,10 +209,23 @@ export function setupWizard(catalog: Equipment[]) {
         }
       }
     }
-    if (page === 2 && procedure.value.trim() && ![...steps.querySelectorAll('textarea')].some(input=>input.value.trim())) {
-      if (!steps.childElementCount) addStep();
-      target = steps.querySelector('textarea');
-      message = 'Adicione pelo menos uma etapa para este procedimento.';
+    if (page===1 && !target) {
+      const inputs = ['question','choice0','reply0','choice1','reply1'].map(id=>get<HTMLInputElement>(id));
+      if (inputs.some(input=>input.value.trim())) {
+        target = inputs.find(input=>!input.value.trim()) ?? null;
+        if (target) { get<HTMLDetailsElement>('quiz-editor').open = true; message = 'Complete a pergunta, as alternativas e os comentários, ou deixe todos vazios.'; }
+      }
+    }
+    if (page === 2) for (const block of procedures.querySelectorAll('fieldset')) {
+      const title = block.querySelector('input')!;
+      const entries = [...block.querySelectorAll('textarea')];
+      if (entries.some(input=>input.value.trim()) && !title.value.trim()) {
+        target = title; message = 'Dê um nome ao procedimento.'; break;
+      }
+      if (title.value.trim() && !entries.some(input=>input.value.trim())) {
+        if (!entries.length) addStep(block.querySelector('.steps')!);
+        target = block.querySelector('textarea'); message = 'Adicione uma etapa ao procedimento.'; break;
+      }
     }
     if (target) {
       target.setCustomValidity(message); target.reportValidity(); target.setCustomValidity('');
@@ -183,7 +245,7 @@ export function setupWizard(catalog: Equipment[]) {
   selector.onchange = () => { if (discard()) load(); else selector.value = current?.id ?? ''; };
   get('add-spec').onclick = () => { addPair(specs,undefined,true); dirty = true; };
   get('add-metric').onclick = () => { addPair(readings,undefined,true); dirty = true; };
-  get('add-step').onclick = () => { addStep('',true); dirty = true; };
+  get('add-procedure').onclick = () => { addProcedure().focus(); dirty = true; };
   get('back').onclick = () => show(page-1);
   get('cancel').onclick = () => {
     if (!discard()) return;
@@ -202,9 +264,17 @@ export function setupWizard(catalog: Equipment[]) {
       }
     } else if (!valid()) return;
     if (page < 2) { show(page+1); return; }
+    const routes = [...procedures.querySelectorAll('fieldset')].map(block=>({
+      title:block.querySelector('input')!.value.trim(),
+      steps:[...block.querySelectorAll('textarea')].map(input=>input.value.trim()).filter(Boolean)
+    })).filter(p=>p.steps.length);
+    const question = get<HTMLInputElement>('question').value.trim();
+    const quiz = question ? { question,
+      choices:[0,1].map(i=>get<HTMLInputElement>('choice'+i).value.trim()),
+      feedback:[0,1].map(i=>get<HTMLInputElement>('reply'+i).value.trim()) } : undefined;
     const machine: Equipment = { ...current, id: current?.id ?? crypto.randomUUID(), name: name.value.trim(),
-      info: lines(specs), readings: lines(readings), procedure: procedure.value.trim(),
-      steps: [...steps.querySelectorAll('textarea')].map(input=>input.value.trim()).filter(Boolean) };
+      quiz, info: lines(specs), readings: lines(readings), photo, procedures: routes, procedure: routes[0]?.title ?? '',
+      steps: routes[0]?.steps ?? [] };
     persist(current ? catalog.map(item=>item.id===machine.id ? machine : item) : [...catalog,machine]);
   };
 }

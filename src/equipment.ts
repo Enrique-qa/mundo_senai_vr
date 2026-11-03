@@ -1,3 +1,4 @@
+export interface Procedure { title: string; steps: string[] }
 export interface Equipment {
   id: string;
   name: string;
@@ -5,10 +6,13 @@ export interface Equipment {
   readings: string;
   procedure: string;
   steps: string[];
+  procedures?: Procedure[];
+  photo?: string;
   quiz?: { question: string; choices: string[]; feedback: string[] };
 }
 
 const demo: Equipment = {
+  photo: '/printer-outline.svg',
   id: 'demo-fdm', name: 'Impressora 3D (exemplo)',
   info: 'Modelo: Lab FDM-01\nNº de série: DEMO-3D-001\nVolume útil: 220 x 220 x 250 mm\nBico: 0,4 mm\nFilamento: PLA de 1,75 mm',
   readings: 'Bico: 205 °C | Mesa: 60 °C\nMovimento: 50 mm/s | Filamento: 0 g',
@@ -32,9 +36,13 @@ export function loadCatalog(): Equipment[] {
   return [demo];
 }
 export function saveCatalog(items: Equipment[]) { localStorage.setItem(key, JSON.stringify(items)); }
-export function stationText(machine: Equipment, tab: number, step: number, feedback: string) {
-  if (tab === 0) return machine.info || 'Ficha técnica ainda não cadastrada.';
-  if (tab === 1) return ['Leituras simuladas', machine.readings || 'Sem leituras cadastradas.', feedback || machine.quiz?.question].filter(Boolean).join('\n');
-  if (!machine.steps.length) return 'Roteiro de manutenção ainda não cadastrado.';
-  return [machine.procedure, `Etapa ${step+1} de ${machine.steps.length}`, machine.steps[step]].join('\n');
+export function proceduresFor(machine: Equipment): Procedure[] {
+  return machine.procedures ?? (machine.steps.length ? [{title: machine.procedure || 'Procedimento', steps: machine.steps}] : []);
+}
+
+export function fieldsFor(machine: Equipment, tab: number) {
+  return (tab === 0 ? machine.info.split('\n') : machine.readings.split(/\n| \| /)).filter(Boolean).map(line => {
+    const colon = line.indexOf(':');
+    return colon < 0 ? {key:'Observação',value:line} : {key:line.slice(0,colon),value:line.slice(colon+1).trim()};
+  });
 }
