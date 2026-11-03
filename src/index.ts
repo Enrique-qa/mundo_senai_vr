@@ -9,6 +9,17 @@ const machines = document.querySelector<HTMLSelectElement>('#machines')!;
 for (const machine of catalog) machines.add(new Option(machine.name, machine.id));
 if (!catalog.length) machines.add(new Option('Nenhuma máquina cadastrada',''));
 machines.disabled = button('preview').disabled = !catalog.length;
+function showPlacement(placed: ReadonlySet<string>) {
+  const list = document.querySelector<HTMLUListElement>('#placement-list')!;
+  list.replaceChildren();
+  for (const machine of catalog) {
+    const row = document.createElement('li');
+    row.textContent = machine.name + ' — ' + (placed.has(machine.id) ? 'Posicionada' : 'A posicionar');
+    list.append(row);
+  }
+  if (!catalog.length) list.textContent = 'Nenhuma máquina cadastrada.';
+}
+showPlacement(new Set());
 setupWizard(catalog);
 machines.onchange = () => { step = 0; if (!sample.hidden) preview(); };
 function preview(tab = 0, feedback = '') {
@@ -45,11 +56,11 @@ button('preview').onclick = () => { step = 0; preview(); sample.focus(); };
 async function start() {
   if (!catalog.length) { status.textContent = 'Cadastre a primeira máquina para começar.'; return; }
   if (!navigator.xr || !await navigator.xr.isSessionSupported('immersive-ar')) {
-    status.textContent = 'Realidade mista indisponível. Explore as três abas na prévia desktop.';
+    status.textContent = 'Realidade mista indisponível. Toque em Explorar em 2D para consultar a máquina.';
     return;
   }
   const { setup } = await import('./xr');
-  const launch = await setup(catalog);
+  const launch = await setup(catalog, showPlacement);
   for (const id of ['admin','visitor']) {
     button(id).disabled = false;
     button(id).onclick = () => {
@@ -57,7 +68,7 @@ async function start() {
       launch(id === 'admin');
     };
   }
-  status.textContent = 'Em Posicionar no ambiente, fixe cada placa com o gatilho direito, na ordem do catálogo. Depois, entregue o visor ao visitante na mesma sessão. O acesso direto de visitante distribui as placas em posições de demonstração.';
+  status.textContent = 'Em Posicionar no ambiente, escolha a máquina na lista, alinhe a placa e confirme com o gatilho direito. Selecione Iniciar visita para entregar o visor. O botão B do controle direito reabre a lista. O acesso direto de visitante distribui as placas em posições de demonstração.';
 }
-start().catch(() => { status.textContent = 'Não foi possível iniciar a cena. Verifique HTTPS e o acesso à rede ou use a prévia desktop.'; });
+start().catch(() => { status.textContent = 'Não foi possível iniciar a cena. Verifique HTTPS e o acesso à rede ou use Explorar em 2D.'; });
 

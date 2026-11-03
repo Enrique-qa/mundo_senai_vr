@@ -21,7 +21,7 @@
           <span class="eyebrow">MUNDO SENAI &nbsp; / &nbsp; LABORATÓRIO</span>
           <h1 id="headline">Explore o<br><em>laboratório.</em></h1>
           <p class="lead">Escolha um equipamento para consultar sua ficha técnica, interpretar leituras simuladas e percorrer uma manutenção guiada.</p>
-          <div class="actions"><button id="visitor" class="accent" disabled>Modo visitante <span aria-hidden="true">↗</span></button><button id="preview">Prévia desktop <span aria-hidden="true">→</span></button></div>
+          <div class="actions"><button id="visitor" class="accent" disabled>Modo visitante <span aria-hidden="true">↗</span></button><button id="preview">Explorar em 2D <span aria-hidden="true">→</span></button></div>
           <button class="operator" id="admin" disabled>Posicionar no ambiente</button>
         </div>
         <figure class="catalog">
@@ -36,6 +36,7 @@
       <form id="editor" hidden novalidate aria-labelledby="wizard-title">
         <span class="eyebrow">ADMINISTRAÇÃO · CATÁLOGO LOCAL</span>
         <h2 id="wizard-title">Cadastro de máquinas</h2>
+        <details class="placement-overview"><summary>Máquinas cadastradas e posicionamento</summary><p>As posições valem apenas para a sessão atual do Quest.</p><ul id="placement-list"></ul></details>
         <label>Ficha para editar<select id="edit-machine"><option value="">＋ Criar nova máquina</option></select></label>
         <ol class="wizard-progress" aria-label="Etapas do cadastro"><li><button type="button">1 · Informações</button></li><li><button type="button">2 · Diagnóstico</button></li><li><button type="button">3 · Manutenção</button></li></ol>
         <section class="wizard-page">

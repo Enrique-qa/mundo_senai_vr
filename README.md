@@ -28,10 +28,10 @@ no navegador do Quest e siga o teste abaixo.
 
 ## Teste de campo
 1. Use **Gerenciar máquinas** para cadastrar as fichas no próprio Quest. Abra **Posicionar no ambiente** no navegador do Quest. Autorize a sessão. Confirme que vê a sala pela câmera e que a placa “Impressora 3D” acompanha a mira do controle direito.
-2. Para cada nome apresentado, aponte para perto da máquina correspondente. Ajuste a distância com o analógico direito e confirme com o gatilho. Mova a cabeça lateralmente e confira se a placa ficou no ponto escolhido.
-3. Entregue o visor ao visitante mantendo essa sessão aberta. Mire novamente na placa e aperte o gatilho. Leia o texto, alterne todas as abas, responda ao diagnóstico e percorra as três etapas.
-4. Feche o painel, abra novamente e teste **Reposicionar**. Ao terminar a sessão pelo menu do Quest, repita a calibração na próxima entrada. O botão de visitante da tela inicial abre os marcadores em posições de demonstração.
-5. Se a sala ou a mira não aparecer, confira permissões, conexão e rastreamento do controle. Volte à tela de entrada e escolha **Prévia desktop** para continuar a explicação.
+2. Selecione uma máquina na lista paginada. Confira o estado **A posicionar** ou **Posicionada** e o total preparado. Mire na marca física escolhida para essa máquina. Ajuste a distância com o analógico direito e confirme com o gatilho. Mova a cabeça lateralmente e confira se a placa ficou no ponto escolhido.
+3. Selecione **Iniciar visita** para mostrar somente as máquinas já posicionadas. Entregue o visor mantendo a sessão aberta. Mire novamente na placa e aperte o gatilho. Leia o texto, alterne todas as abas, responda ao diagnóstico e percorra as três etapas.
+4. O painel abre acima do marcador. Feche-o e use **B** no controle direito para reabrir a lista. Escolha uma máquina posicionada para reajustar; **B** durante o ajuste cancela e restaura o ponto anterior. Ao terminar a sessão pelo menu do Quest, repita a calibração na próxima entrada. O botão de visitante da tela inicial abre os marcadores em posições de demonstração.
+5. Se a sala ou a mira não aparecer, confira permissões, conexão e rastreamento do controle. Volte à tela de entrada e escolha **Explorar em 2D** para continuar a explicação.
 
 ## Arquitetura e escopo
 - Vite, TypeScript e IWSDK 1.1.0-rc.2, com versões resolvidas no lockfile. O script de desenvolvimento inicia o Vite com o plugin IWSDK. O lançador gerenciado original falhou ao identificar o processo no Windows deste ambiente.

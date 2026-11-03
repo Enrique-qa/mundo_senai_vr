@@ -1,0 +1,19 @@
+<style>
+.root { width: 480px; padding: 18px; gap: 9px; flex-direction: column; background-color: #141825; }
+.caption { font-size: 18px; color: #80e2eb; }
+.title { font-size: 26px; color: #ffda50; }
+.row { flex-direction: row; gap: 8px; }
+</style>
+<Panel class="root">
+<div class="title">Preparar o ambiente</div>
+<div id="summary" class="caption">Maquinas cadastradas</div>
+<div>Selecione uma maquina para posicionar ou ajustar.</div>
+<Button id="slot0"><ButtonLabel>Maquina</ButtonLabel></Button>
+<Button id="slot1"><ButtonLabel>Maquina</ButtonLabel></Button>
+<Button id="slot2"><ButtonLabel>Maquina</ButtonLabel></Button>
+<div class="row">
+<Button id="prev"><ButtonLabel>Anterior</ButtonLabel></Button>
+<Button id="next"><ButtonLabel>Proxima</ButtonLabel></Button>
+</div>
+<Button id="visit"><ButtonLabel>Iniciar visita</ButtonLabel></Button>
+</Panel>
