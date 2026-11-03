@@ -1,0 +1,45 @@
+{
+  "version": "iwsdk.scene.v1",
+  "units": "meters",
+  "nodes": [
+    {
+      "id": "marker",
+      "name": "marker",
+      "content": {
+        "type": "asset",
+        "asset": "marker"
+      },
+      "transform": {
+        "position": [
+          0,
+          1.5,
+          -1
+        ],
+        "scale": 0.27
+      },
+      "components": {
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "detail",
+      "name": "detail",
+      "content": {
+        "type": "asset",
+        "asset": "detail"
+      },
+      "transform": {
+        "position": [
+          0,
+          1.5,
+          -1
+        ],
+        "scale": 0.27
+      },
+      "components": {
+        "RayInteractable": {}
+      }
+    }
+  ],
+  "resources": {}
+}
