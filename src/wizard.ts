@@ -34,6 +34,8 @@ export function setupWizard(catalog: Equipment[]) {
   const procedure = get<HTMLInputElement>('procedure');
   const specs = get('spec-list'), readings = get('metric-list'), steps = get('step-list');
   const pages = [...form.querySelectorAll<HTMLElement>('.wizard-page')];
+  const navigation = [...form.querySelectorAll<HTMLButtonElement>('.wizard-progress button')];
+  navigation.forEach((button,i) => { button.onclick = () => show(i); });
   let page = 0;
   let current: Equipment | undefined;
   let dirty = false;
@@ -44,9 +46,9 @@ export function setupWizard(catalog: Equipment[]) {
   function show(index: number, focus = true) {
     page = index;
     pages.forEach((section, i) => { section.hidden = i !== page; });
-    form.querySelectorAll('.wizard-progress li').forEach((li,i) => {
-      if (i === page) li.setAttribute('aria-current','step');
-      else li.removeAttribute('aria-current');
+    navigation.forEach((button,i) => {
+      if (i === page) button.setAttribute('aria-current','step');
+      else button.removeAttribute('aria-current');
     });
     get('back').hidden = page === 0;
     get('advance').textContent = page === 2 ? 'Salvar máquina' : 'Continuar';
@@ -192,7 +194,13 @@ export function setupWizard(catalog: Equipment[]) {
   };
   form.onsubmit = event => {
     event.preventDefault();
-    if (!valid()) return;
+    // Direct navigation allows incomplete drafts. Validate all steps before saving.
+    if (page === 2) {
+      for (let i = 0; i < pages.length; i++) {
+        show(i, false);
+        if (!valid()) return;
+      }
+    } else if (!valid()) return;
     if (page < 2) { show(page+1); return; }
     const machine: Equipment = { ...current, id: current?.id ?? crypto.randomUUID(), name: name.value.trim(),
       info: lines(specs), readings: lines(readings), procedure: procedure.value.trim(),

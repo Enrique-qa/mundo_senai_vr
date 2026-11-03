@@ -46,7 +46,7 @@ textarea{min-height:70px;resize:vertical}
 #editor{border:1px solid var(--line)}
 #editor h2{margin:4px 0 20px}
 .wizard-progress{display:flex;gap:6px;list-style:none;margin:10px 0 22px;padding:0}
-.wizard-progress li{flex:1;padding:8px 3px;border-top:3px solid #454959;color:var(--muted);font-size:.86rem}
+.wizard-progress li{flex:1;min-width:0}.wizard-progress button{width:100%;min-height:44px;border:0;border-radius:0;padding:8px 2px;border-top:3px solid #454959;color:var(--muted);font-size:.86rem}
 .wizard-progress [aria-current]{border-color:var(--yellow);color:var(--yellow);font-weight:700}
 .wizard-page h3{font-size:1.55rem;margin:0}
 .wizard-page p{margin:4px 0 18px}
@@ -61,4 +61,4 @@ textarea{min-height:70px;resize:vertical}
 .wizard-nav{border-top:1px solid var(--line);margin-top:22px;justify-content:flex-end}
 #advance{background:var(--yellow);border-color:var(--yellow);color:#171711}
 .wizard-tools small{margin-right:auto;color:var(--muted)}
-@media(max-width:480px){.wizard-progress li{font-size:.73rem}.pair-row{align-items:stretch}.pair-row label{flex-basis:100%}}
+@media(max-width:480px){.wizard-progress button{font-size:.73rem}.pair-row{align-items:stretch}.pair-row label{flex-basis:100%}}
