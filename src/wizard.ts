@@ -1,4 +1,4 @@
-import { saveCatalog, proceduresFor, type Equipment, type Procedure } from './equipment';
+import { saveCatalog, proceduresFor, kindLabel, type Equipment, type Procedure } from './equipment';
 
 type Pair = [string, string];
 const metrics = ['Temperatura', 'Velocidade', 'Pressão', 'Tensão', 'Corrente', 'Potência', 'Vibração', 'Status', 'Problema'];
@@ -31,6 +31,7 @@ export function setupWizard(catalog: Equipment[]) {
   const form = get<HTMLFormElement>('editor');
   const selector = get<HTMLSelectElement>('edit-machine');
   const name = get<HTMLInputElement>('machine-name');
+  const kind = get<HTMLSelectElement>('kind');
   const procedures = get('procedures');
   const specs = get('spec-list'), readings = get('metric-list');
   const pages = [...form.querySelectorAll<HTMLElement>('.wizard-page')];
@@ -39,23 +40,25 @@ export function setupWizard(catalog: Equipment[]) {
   let page = 0;
   let current: Equipment | undefined;
   let dirty = false;
-  for (const item of catalog) selector.add(new Option(item.name, item.id));
+  for (const item of catalog) selector.add(new Option(kindLabel(item)+' · '+item.name, item.id));
   form.oninput = () => { dirty = true; };
   const discard = () => !dirty || confirm('Descartar as alterações desta ficha?');
 
   function show(index: number, focus = true) {
-    page = index;
+    const part = kind.value === 'part';
+    page = part ? 0 : index;
     pages.forEach((section, i) => { section.hidden = i !== page; });
     navigation.forEach((button,i) => {
+      button.closest('li')!.hidden = part && i>0;
       if (i === page) button.setAttribute('aria-current','step');
       else button.removeAttribute('aria-current');
     });
     get('back').hidden = page === 0;
-    get('advance').textContent = page === 2 ? 'Salvar máquina' : 'Continuar';
+    get('advance').textContent = part ? 'Salvar peça' : page === 2 ? 'Salvar máquina' : 'Continuar';
     if (focus) pages[page].querySelector('h3')?.focus();
   }
 
-  function addPair(list: HTMLElement, pair: Pair = ['', ''], focus = false) {
+  function addPair(list: HTMLElement, pair: Pair = ['', ''], focus = false, custom = false) {
     const isMetric = list === readings;
     const row = document.createElement('div');
     row.className = 'pair-row';
@@ -63,7 +66,7 @@ export function setupWizard(catalog: Equipment[]) {
     const key = document.createElement('input');
     key.className = 'pair-key';
     key.value = pair[0];
-    key.placeholder = isMetric ? 'Ex.: Fluxo de ar' : 'Ex.: Série ou voltagem';
+    key.placeholder = isMetric ? 'Ex.: Defeito' : 'Ex.: Série ou voltagem';
     const value = document.createElement('input');
     value.className = 'pair-value';
     value.value = pair[1];
@@ -72,13 +75,13 @@ export function setupWizard(catalog: Equipment[]) {
       const choice = document.createElement('select');
       choice.add(new Option('Escolha uma leitura', ''));
       for (const metric of metrics) choice.add(new Option(metric,metric));
-      choice.add(new Option('Outra leitura…','custom'));
-      choice.value = metrics.includes(pair[0]) ? pair[0] : pair[0] || pair[1] ? 'custom' : '';
+      choice.add(new Option('Campo personalizado…','custom'));
+      choice.value = custom ? 'custom' : metrics.includes(pair[0]) ? pair[0] : pair[0] || pair[1] ? 'custom' : '';
       labeled(row, 'Leitura', choice);
-      labeled(row, 'Nome da leitura', key);
+      labeled(row, 'Rótulo do campo', key);
       const update = () => {
         key.parentElement!.hidden = choice.value !== 'custom';
-        value.placeholder = hints[metrics.indexOf(choice.value)] ?? 'Valor e unidade';
+        value.placeholder = choice.value === 'custom' ? 'Ex.: Queima de capacitor' : hints[metrics.indexOf(choice.value)] ?? 'Valor simulado';
       };
       choice.onchange = () => { dirty = true; update(); if (choice.value === 'custom') key.focus(); };
       update();
@@ -86,7 +89,7 @@ export function setupWizard(catalog: Equipment[]) {
     labeled(row,isMetric ? 'Valor simulado' : 'Valor',value);
     row.append(makeButton('Remover', () => { row.remove(); dirty = true; }));
     list.append(row);
-    if (focus) row.querySelector<HTMLElement>('input,select')?.focus();
+    if (focus) (custom ? key : row.querySelector<HTMLElement>('input,select'))?.focus();
   }
   function refreshSteps(steps: HTMLElement) {
     [...steps.children].forEach((row,i) => {
@@ -164,6 +167,7 @@ export function setupWizard(catalog: Equipment[]) {
   get('clear-photo').onclick = () => { setPhoto(''); dirty = true; };
   function load() {
     current = catalog.find(item => item.id === selector.value);
+    kind.value = current?.kind ?? 'machine';
     name.value = current?.name ?? '';
     procedures.replaceChildren(); specs.replaceChildren(); readings.replaceChildren();
     for (const p of current ? proceduresFor(current) : []) addProcedure(p);
@@ -176,7 +180,11 @@ export function setupWizard(catalog: Equipment[]) {
     }
     get<HTMLDetailsElement>('quiz-editor').open = !!current?.quiz;
     for (const pair of legacyPairs(current?.info ?? '',false)) addPair(specs,pair);
-    for (const pair of legacyPairs(current?.readings ?? '',true)) addPair(readings,pair);
+    if (current?.diagnosticFields) {
+      for (const {key,value} of current.diagnosticFields) addPair(readings,[key,value]);
+    } else {
+      for (const pair of legacyPairs(current?.readings ?? '',true)) addPair(readings,pair);
+    }
     if (!specs.childElementCount) addPair(specs);
     if (!readings.childElementCount) addPair(readings);
     get('remove').hidden = !current;
@@ -195,7 +203,7 @@ export function setupWizard(catalog: Equipment[]) {
   function valid() {
     let target: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null = null;
     let message = '';
-    if (page === 0 && !name.value.trim()) { target = name; message = 'Informe o nome da máquina.'; }
+    if (page === 0 && !name.value.trim()) { target = name; message = 'Informe o nome do item.'; }
     if (!target && page < 2) {
       const list = page === 0 ? specs : readings;
       for (const {row,key,value} of pairs(list)) {
@@ -243,6 +251,8 @@ export function setupWizard(catalog: Equipment[]) {
   get('manage').onclick = () => { if (form.hidden) { form.hidden = false; load(); } selector.focus(); };
   selector.oninput = event => event.stopPropagation();
   selector.onchange = () => { if (discard()) load(); else selector.value = current?.id ?? ''; };
+  kind.onchange = () => { dirty = true; show(0,false); };
+  get('add-custom').onclick = () => { addPair(readings,undefined,true,true); dirty = true; };
   get('add-spec').onclick = () => { addPair(specs,undefined,true); dirty = true; };
   get('add-metric').onclick = () => { addPair(readings,undefined,true); dirty = true; };
   get('add-procedure').onclick = () => { addProcedure().focus(); dirty = true; };
@@ -257,13 +267,14 @@ export function setupWizard(catalog: Equipment[]) {
   form.onsubmit = event => {
     event.preventDefault();
     // Direct navigation allows incomplete drafts. Validate all steps before saving.
-    if (page === 2) {
-      for (let i = 0; i < pages.length; i++) {
+    const last = kind.value === 'part' ? 0 : 2;
+    if (page === last) {
+      for (let i = 0; i <= last; i++) {
         show(i, false);
         if (!valid()) return;
       }
     } else if (!valid()) return;
-    if (page < 2) { show(page+1); return; }
+    if (page < last) { show(page+1); return; }
     const routes = [...procedures.querySelectorAll('fieldset')].map(block=>({
       title:block.querySelector('input')!.value.trim(),
       steps:[...block.querySelectorAll('textarea')].map(input=>input.value.trim()).filter(Boolean)
@@ -273,6 +284,8 @@ export function setupWizard(catalog: Equipment[]) {
       choices:[0,1].map(i=>get<HTMLInputElement>('choice'+i).value.trim()),
       feedback:[0,1].map(i=>get<HTMLInputElement>('reply'+i).value.trim()) } : undefined;
     const machine: Equipment = { ...current, id: current?.id ?? crypto.randomUUID(), name: name.value.trim(),
+      kind: kind.value === 'part' ? 'part' : 'machine',
+      diagnosticFields: pairs(readings).filter(p=>p.value).map(({key,value})=>({key,value})),
       quiz, info: lines(specs), readings: lines(readings), photo, procedures: routes, procedure: routes[0]?.title ?? '',
       steps: routes[0]?.steps ?? [] };
     persist(current ? catalog.map(item=>item.id===machine.id ? machine : item) : [...catalog,machine]);

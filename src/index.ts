@@ -1,23 +1,23 @@
 import { setupWizard } from './wizard';
-import { loadCatalog, fieldsFor, proceduresFor } from './equipment';
+import { loadCatalog, fieldsFor, kindLabel, proceduresFor } from './equipment';
 const sample = document.querySelector<HTMLElement>('#sample')!;
 const status = document.querySelector<HTMLElement>('#status')!;
 const button = (id: string) => document.querySelector<HTMLButtonElement>('#' + id)!;
 let step = 0;
 const catalog = loadCatalog();
 const machines = document.querySelector<HTMLSelectElement>('#machines')!;
-for (const machine of catalog) machines.add(new Option(machine.name, machine.id));
-if (!catalog.length) machines.add(new Option('Nenhuma máquina cadastrada',''));
+for (const machine of catalog) machines.add(new Option(kindLabel(machine)+' · '+machine.name, machine.id));
+if (!catalog.length) machines.add(new Option('Nenhum item cadastrado',''));
 machines.disabled = button('preview').disabled = !catalog.length;
 function showPlacement(placed: ReadonlySet<string>) {
   const list = document.querySelector<HTMLUListElement>('#placement-list')!;
   list.replaceChildren();
   for (const machine of catalog) {
     const row = document.createElement('li');
-    row.textContent = machine.name + ' — ' + (placed.has(machine.id) ? 'Posicionada' : 'A posicionar');
+    row.textContent = kindLabel(machine)+' · '+machine.name + ' — ' + (placed.has(machine.id) ? 'Posicionada' : 'A posicionar');
     list.append(row);
   }
-  if (!catalog.length) list.textContent = 'Nenhuma máquina cadastrada.';
+  if (!catalog.length) list.textContent = 'Nenhum item cadastrado.';
 }
 showPlacement(new Set());
 setupWizard(catalog);
@@ -33,10 +33,10 @@ function preview(tab = 0, feedback = '', route = -1) {
   function control(parent: HTMLElement, title: string, fn: () => void) {
     const el = document.createElement('button'); el.textContent = title; el.onclick = fn; parent.append(el); return el;
   }
-  const tabs = ['Informações','Diagnóstico','Manutenções'];
+  const tabs = machine.kind === 'part' ? ['Informações'] : ['Informações','Diagnóstico','Manutenções'];
   const routes = proceduresFor(machine);
   const selected = routes[route];
-  text(sample,'small','SENAI X-RAY   /   '+machine.name);
+  text(sample,'small',kindLabel(machine).toUpperCase()+'   /   '+machine.name);
   text(sample,'h2',selected?.title ?? tabs[tab]);
   const body = document.createElement('div'); body.className = 'sheet-body'; sample.append(body);
   const content = document.createElement('div'); body.append(content);
@@ -74,9 +74,9 @@ function preview(tab = 0, feedback = '', route = -1) {
 }
 button('preview').onclick = () => { step = 0; preview(); sample.focus(); };
 async function start() {
-  if (!catalog.length) { status.textContent = 'Cadastre a primeira máquina para começar.'; return; }
+  if (!catalog.length) { status.textContent = 'Cadastre uma máquina ou peça para começar.'; return; }
   if (!navigator.xr || !await navigator.xr.isSessionSupported('immersive-ar')) {
-    status.textContent = 'Realidade mista indisponível. Toque em Explorar em 2D para consultar a máquina.';
+    status.textContent = 'Realidade mista indisponível. Toque em Explorar em 2D para consultar a ficha.';
     return;
   }
   const { setup } = await import('./xr');
@@ -91,7 +91,7 @@ async function start() {
       launch(id === 'admin');
     };
   }
-  status.textContent = 'Em Posicionar no ambiente, escolha a máquina na lista, alinhe a placa e confirme com o gatilho direito. Selecione Iniciar visita para entregar o visor. No administrador, B reabre a lista. No modo visitante direto, B volta ao navegador. O acesso direto de visitante distribui as placas em posições de demonstração.';
+  status.textContent = 'Em Posicionar no ambiente, escolha o item na lista, alinhe a placa e confirme com o gatilho direito. Selecione Iniciar visita para entregar o visor. No administrador, B reabre a lista. No modo visitante direto, B volta ao navegador. O acesso direto de visitante distribui as placas em posições de demonstração.';
 }
 start().catch(() => { status.textContent = 'Não foi possível iniciar a cena. Verifique HTTPS e o acesso à rede ou use Explorar em 2D.'; });
 

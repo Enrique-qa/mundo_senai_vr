@@ -1,7 +1,7 @@
 import { World, createSystem, UIKitMLAsset, InputComponent, RayInteractable, Vector3 } from '@iwsdk/core';
 import { Text } from '@pmndrs/uikit';
 import options from 'virtual:iwsdk-project';
-import { fieldsFor, proceduresFor, type Equipment } from './equipment';
+import { fieldsFor, kindLabel, proceduresFor, type Equipment } from './equipment';
 
 const fontFamilies = { Barlow: { 600: import.meta.env.BASE_URL + 'fonts/barlow-pt.json' } };
 function styleText(asset: UIKitMLAsset) {
@@ -101,7 +101,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         panel.visible = true;
         this.renderPanel();
       }));
-      for (let i=0;i<3;i++) listen(panel, 'tab'+i, () => { this.tab = i; this.step = 0; this.route = -1; this.renderPanel(); });
+      for (let i=0;i<3;i++) listen(panel, 'tab'+i, () => { if (catalog[this.selected].kind==='part' && i!==0) return; this.tab = i; this.step = 0; this.route = -1; this.renderPanel(); });
       for (let i=0;i<3;i++) listen(panel,'route'+i,()=>{
         this.route = this.step*3+i; this.step = 0; this.renderPanel();
       });
@@ -155,7 +155,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       for (let slot=0;slot<3;slot++) {
         const item = catalog[this.page*3+slot];
         menu.requireElementById('slot'+slot).setProperties({display:item?'flex':'none'});
-        if (item) label(menu,'slot'+slot,(this.placed.has(item.id)?'Posicionada':'A posicionar')+'  /  '+item.name);
+        if (item) label(menu,'slot'+slot,(this.placed.has(item.id)?'Posicionada':'A posicionar')+'  /  '+kindLabel(item)+' · '+item.name);
       }
       menu.requireElementById('prev').setProperties({display:this.page>0?'flex':'none'});
       menu.requireElementById('next').setProperties({display:this.page+1<pages?'flex':'none'});
@@ -166,8 +166,9 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       for (let i=0;i<3;i++) {
         const tab = panel.requireElementById('tab'+i);
         const active = i===this.tab;
-        tab.setProperties({borderColor:active?'#ffe651':'#485773',backgroundColor:active?'#ffe651':'#202b40'});
-        tab.traverse(el=>{ if (el instanceof Text) el.setProperties({color:active?'#101320':'#e7f0ff'}); });
+        tab.setProperties({display:machine.kind==='part' && i>0?'none':'flex',
+          borderColor:active?'#ffe36a':'#93accc',backgroundColor:active?'#403619':'#182638'});
+        tab.traverse(el=>{ if (el instanceof Text) el.setProperties({color:active?'#fff39b':'#ffffff'}); });
       }
       const routes = proceduresFor(machine);
       const selected = this.tab===2 ? routes[this.route] : undefined;
@@ -176,7 +177,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       const count = selected ? selected.steps.length : Math.ceil((list?routes.length:fields.length)/3);
       this.step = Math.max(0,Math.min(this.step,count-1));
       label(panel,'machine',machine.name);
-      label(panel,'chapter','FICHA   /   0'+(this.tab+1));
+      label(panel,'chapter',kindLabel(machine).toUpperCase()+'   /   0'+(this.tab+1));
       label(panel,'page-label',count>1 ? (selected?'ETAPA  ':'PÁGINA  ')+(this.step+1)+' / '+count : '');
       panel.requireElementById('figure').setProperties({display:machine.photo?'flex':'none'});
       label(panel,'title',selected?.title ?? ['Informações','Diagnóstico simulado','Manutenções'][this.tab]);

@@ -27,9 +27,9 @@
   <div class="rule"><div class="cool"></div><div class="warm"></div><div class="rose"></div></div>
   <div id="machine" class="tag">Equipamento</div>
   <div id="title" class="heading">Informações</div>
-  <div class="tabs"><Button id="tab0" class="tab"><ButtonLabel style="color:#eef4ff;font-size:17px">Informações</ButtonLabel></Button>
-    <Button id="tab1" class="tab"><ButtonLabel style="color:#eef4ff;font-size:17px">Diagnóstico</ButtonLabel></Button>
-    <Button id="tab2" class="tab"><ButtonLabel style="color:#eef4ff;font-size:17px">Manutenções</ButtonLabel></Button></div>
+  <div class="tabs"><Button id="tab0" class="tab"><ButtonLabel style="color:#ffffff;font-size:20px">Informações</ButtonLabel></Button>
+    <Button id="tab1" class="tab"><ButtonLabel style="color:#ffffff;font-size:20px">Diagnóstico</ButtonLabel></Button>
+    <Button id="tab2" class="tab"><ButtonLabel style="color:#ffffff;font-size:20px">Manutenções</ButtonLabel></Button></div>
   <div class="body">
     <div class="data">
         <div id="field0" class="datum"><div id="key0" class="key">Campo</div><div id="val0" class="value">Valor</div></div>

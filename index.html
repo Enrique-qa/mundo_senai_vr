@@ -26,10 +26,10 @@
         </div>
         <figure class="catalog">
           <div class="plate"><span>X-RAY</span> CATÁLOGO DE EQUIPAMENTOS</div>
-          <div class="catalog-body"><label for="machines">Escolha uma máquina</label>
+          <div class="catalog-body"><label for="machines">Escolha uma máquina ou peça</label>
           <select id="machines"></select>
-          <p>A prévia mostra a ficha selecionada. No Quest, cada marcador abre a ficha da máquina correspondente.</p>
-          <button id="manage">Gerenciar máquinas</button></div>
+          <p>A prévia mostra a ficha selecionada. No Quest, cada marcador abre a ficha do item correspondente.</p>
+          <button id="manage">Gerenciar catálogo</button></div>
         </figure>
       </section>
       <details class="area-help"><summary>Como preparar a área no Quest</summary>
@@ -39,22 +39,22 @@
       <p id="status" role="status">Verificando realidade mista…</p>
       <form id="editor" hidden novalidate aria-labelledby="wizard-title">
         <span class="eyebrow">ADMINISTRAÇÃO · CATÁLOGO LOCAL</span>
-        <h2 id="wizard-title">Cadastro de máquinas</h2>
-        <details class="placement-overview"><summary>Máquinas cadastradas e posicionamento</summary><p>As posições valem apenas para a sessão atual do Quest.</p><ul id="placement-list"></ul></details>
-        <label>Ficha para editar<select id="edit-machine"><option value="">＋ Criar nova máquina</option></select></label>
+        <h2 id="wizard-title">Cadastro de máquinas e peças</h2>
+        <details class="placement-overview"><summary>Itens cadastrados e posicionamento</summary><p>As posições valem apenas para a sessão atual do Quest.</p><ul id="placement-list"></ul></details>
+        <label>Ficha para editar<select id="edit-machine"><option value="">＋ Criar nova ficha</option></select></label>
         <ol class="wizard-progress" aria-label="Etapas do cadastro"><li><button type="button">1 · Informações</button></li><li><button type="button">2 · Diagnóstico</button></li><li><button type="button">3 · Manutenção</button></li></ol>
         <section class="wizard-page">
           <h3 tabindex="-1">Informações</h3>
           <p>Dê um nome à placa que o visitante verá e acrescente os dados da ficha técnica.</p>
-          <label>Nome da máquina <small>(obrigatório)</small><input id="machine-name" required maxlength="70" placeholder="Ex.: Creality K2"></label>
-          <label>Foto da máquina (opcional)<input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp"></label><img id="photo-preview" hidden alt="Foto cadastrada"><button type="button" id="clear-photo" hidden>Remover foto</button><div id="spec-list"></div>
+          <label>Tipo de ficha<select id="kind"><option value="machine">Máquina</option><option value="part">Peça</option></select></label><label>Nome do item <small>(obrigatório)</small><input id="machine-name" required maxlength="70" placeholder="Ex.: impressora 3D ou placa-mãe"></label>
+          <label>Foto do item (opcional)<input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp"></label><img id="photo-preview" hidden alt="Foto cadastrada"><button type="button" id="clear-photo" hidden>Remover foto</button><div id="spec-list"></div>
           <button type="button" id="add-spec">＋ Adicionar especificação</button>
         </section>
         <section class="wizard-page" hidden>
           <h3 tabindex="-1">Diagnóstico</h3>
-          <p>Escolha quais leituras o visitante verá e informe um valor simulado para cada uma.</p>
+          <p>Escolha uma leitura ou crie um campo com seu próprio rótulo e valor. Por exemplo, Defeito — Queima de capacitor.</p>
           <div id="metric-list"></div>
-          <button type="button" id="add-metric">＋ Adicionar leitura</button>
+          <button type="button" id="add-metric">＋ Adicionar leitura</button> <button id="add-custom" type="button">＋ Campo personalizado</button>
           <details id="quiz-editor"><summary>Pergunta de diagnóstico (opcional)</summary>
             <label>Pergunta<input id="question"></label>
             <label>Alternativa A<input id="choice0"></label><label>Comentário da alternativa A<input id="reply0"></label>

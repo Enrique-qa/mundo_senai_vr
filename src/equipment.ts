@@ -1,5 +1,7 @@
 export interface Procedure { title: string; steps: string[] }
 export interface Equipment {
+  kind?: 'machine' | 'part';
+  diagnosticFields?: {key:string; value:string}[];
   id: string;
   name: string;
   info: string;
@@ -36,11 +38,13 @@ export function loadCatalog(): Equipment[] {
   return [demo];
 }
 export function saveCatalog(items: Equipment[]) { localStorage.setItem(key, JSON.stringify(items)); }
+export function kindLabel(item: Equipment) { return item.kind === 'part' ? 'Peça' : 'Máquina'; }
 export function proceduresFor(machine: Equipment): Procedure[] {
   return machine.procedures ?? (machine.steps.length ? [{title: machine.procedure || 'Procedimento', steps: machine.steps}] : []);
 }
 
 export function fieldsFor(machine: Equipment, tab: number) {
+  if (tab === 1 && machine.diagnosticFields) return machine.diagnosticFields;
   return (tab === 0 ? machine.info.split('\n') : machine.readings.split(/\n| \| /)).filter(Boolean).map(line => {
     const colon = line.indexOf(':');
     return colon < 0 ? {key:'Observação',value:line} : {key:line.slice(0,colon),value:line.slice(colon+1).trim()};

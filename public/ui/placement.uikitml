@@ -21,7 +21,7 @@
   <div class="rule"><div class="cool"></div><div class="warm"></div><div class="rose"></div></div>
   <div class="heading">Preparar o laboratório</div>
   <div id="summary" class="summary">Máquinas cadastradas</div>
-  <div class="tag">SELECIONE UMA MÁQUINA</div>
+  <div class="tag">SELECIONE UMA MÁQUINA OU PEÇA</div>
   <Button id="slot0" class="item"><ButtonLabel style="color:#eef4ff;font-size:17px">Máquina</ButtonLabel></Button>
   <Button id="slot1" class="item"><ButtonLabel style="color:#eef4ff;font-size:17px">Máquina</ButtonLabel></Button>
   <Button id="slot2" class="item"><ButtonLabel style="color:#eef4ff;font-size:17px">Máquina</ButtonLabel></Button>
