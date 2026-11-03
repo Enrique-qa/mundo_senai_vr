@@ -1,6 +1,6 @@
 # IWSDK project
 
-Ao concluir cada tarefa que altere o projeto, faça um commit das mudanças da tarefa e informe o hash.
+Ao concluir cada tarefa que altere o projeto, faça um commit das mudanças da tarefa, envie a branch ao GitHub com git push e informe o hash e o resultado do envio.
 
 A Vite + TypeScript or JavaScript app, but several things do **not** work the way
 a normal Vite project works. Read this section before assuming anything.
