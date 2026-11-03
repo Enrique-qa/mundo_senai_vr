@@ -1,24 +1,30 @@
 <style>
-.root { width: 500px; flex-direction: column; gap: 12px; padding: 20px; border-radius: 22px; background-color: #101320; border-width: 1px; border-color: #435060; }
-.brand { color: #74e2ed; font-size: 16px; }
-.title { color: #ffe651; font-size: 32px; }
-.caption { color: #f5f4fa; font-size: 20px; }
-.row { flex-direction: row; gap: 8px; }
-.item { background-color: #1a2131; border-radius: 12px; }
-.exit { background-color: #20293b; border-color: #74e2ed; border-width: 1px; }
+  .shell { flex-direction: column; width: 660px; padding: 18px; gap: 10px; background-color: #0d1120; border-color: #546079; border-width: 1px; border-radius: 24px; color: #f5f7fb; }
+  .bar { flex-direction: row; justify-content: space-between; align-items: center; gap: 10px; }
+  .brand { font-size: 20px; color: #ffe651; }
+  .tag { color: #88e5ea; font-size: 15px; }
+  .heading { font-size: 34px; color: #fafaff; }
+  .row { flex-direction: row; align-items: center; gap: 8px; }
+  .utility { min-height: 38px; border-radius: 14px; background-color: #1c2537; border-width: 1px; border-color: #46556d; }
+  .choice { min-height: 40px; border-radius: 12px; background-color: #213348; border-width: 1px; border-color: #466179; }
+  .rule { height: 3px; flex-direction: row; }
+  .cool { flex-grow: 2; background-color: #65dbe2; }
+  .warm { flex-grow: 3; background-color: #ffe651; }
+  .rose { flex-grow: 1; background-color: #ec7d9a; }
+  .shell { width: 510px; }
+  .summary { background-color: #1b2c40; color: #a6eff1; border-radius: 10px; padding: 10px; font-size: 19px; }
+  .item { min-height: 44px; background-color: #1b263b; border-radius: 12px; border-width: 1px; border-color: #475670; justify-content: flex-start; }
+  .visit { background-color: #35494d; border-radius: 14px; border-color: #85e4e7; border-width: 2px; }
 </style>
-<Panel class="root">
-  <div class="brand">SENAI X-RAY   /   ADMINISTRAÇÃO</div>
-  <div class="title">Preparar o ambiente</div>
-  <div id="summary" class="caption">Máquinas cadastradas</div>
-  <Button id="scan" class="exit"><ButtonLabel>Escanear ambiente</ButtonLabel></Button>
-  <Button id="slot0" class="item"><ButtonLabel>Máquina</ButtonLabel></Button>
-  <Button id="slot1" class="item"><ButtonLabel>Máquina</ButtonLabel></Button>
-  <Button id="slot2" class="item"><ButtonLabel>Máquina</ButtonLabel></Button>
-  <div class="row">
-    <Button id="prev"><ButtonLabel>Anterior</ButtonLabel></Button>
-    <Button id="next"><ButtonLabel>Próxima</ButtonLabel></Button>
-  </div>
-  <Button id="visit"><ButtonLabel>Iniciar visita</ButtonLabel></Button>
-  <Button id="exit" class="exit"><ButtonLabel>Voltar ao navegador</ButtonLabel></Button>
-</Panel>
+<div class="shell">
+  <div class="bar"><div class="brand">SENAI   /   X-RAY</div><div class="tag">ADMINISTRAÇÃO</div></div>
+  <div class="rule"><div class="cool"></div><div class="warm"></div><div class="rose"></div></div>
+  <div class="heading">Preparar o laboratório</div>
+  <div id="summary" class="summary">Máquinas cadastradas</div>
+  <div class="tag">SELECIONE UMA MÁQUINA</div>
+  <Button id="slot0" class="item"><ButtonLabel style="color:#eef4ff;font-size:17px">Máquina</ButtonLabel></Button>
+  <Button id="slot1" class="item"><ButtonLabel style="color:#eef4ff;font-size:17px">Máquina</ButtonLabel></Button>
+  <Button id="slot2" class="item"><ButtonLabel style="color:#eef4ff;font-size:17px">Máquina</ButtonLabel></Button>
+  <div class="bar"><div class="row"><Button id="prev" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Anterior</ButtonLabel></Button><Button id="next" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Próxima</ButtonLabel></Button></div><Button id="scan" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Escanear ambiente</ButtonLabel></Button></div>
+  <div class="bar"><Button id="visit" class="visit"><ButtonLabel style="color:#eef4ff;font-size:17px">Iniciar visita</ButtonLabel></Button><Button id="exit" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Voltar ao navegador</ButtonLabel></Button></div>
+</div>

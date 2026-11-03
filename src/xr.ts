@@ -19,6 +19,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
   const panel = world.requireSceneObject<UIKitMLAsset>('detail');
   panel.visible = false;
   const menu = await world.assets.instantiate<UIKitMLAsset>('placement');
+  panel.scale.multiplyScalar(0.80);
   styleText(panel);
   styleText(menu);
   menu.scale.copy(panel.scale);
@@ -35,7 +36,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
     }
     marker.visible = false;
     styleText(marker);
-    label(marker, 'inspect', machine.name + '  /  Abrir informações');
+    label(marker, 'marker-name', machine.name);
     markers.push(marker);
   }
   let operator = false;
@@ -95,7 +96,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         this.tab = this.step = 0; this.route = -1;
         this.feedback = '';
         panel.position.copy(marker.position);
-        panel.position.y += 0.35;
+        panel.position.y += 0.22;
         for (const item of markers) item.visible = false;
         panel.visible = true;
         this.renderPanel();
@@ -127,13 +128,13 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       this.placementReady = false;
       menu.visible = panel.visible = false;
       markers.forEach((m,i)=>{ m.visible = i===index; });
-      label(markers[index],'inspect',catalog[index].name + '  /  Gatilho: fixar  /  B: cancelar');
+      label(markers[index],'marker-action','Gatilho para fixar   /   B para cancelar');
     }
     private openMenu() {
       if (this.placing >= 0) {
         const i = this.placing;
         markers[i].position.copy(this.previousPosition);
-        label(markers[i],'inspect',catalog[i].name + '  /  Abrir informações');
+        label(markers[i],'marker-action','Abrir informações');
         this.placing = -1;
       }
       for (const marker of markers) marker.visible = false;
@@ -162,17 +163,22 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
     }
     private renderPanel() {
       const machine = catalog[this.selected];
-      for (let i=0;i<3;i++) panel.requireElementById('tab'+i).setProperties({
-        borderColor: i===this.tab ? '#ffe651' : '#435060',
-        backgroundColor: i===this.tab ? '#38321b' : '#1a2131'
-      });
+      for (let i=0;i<3;i++) {
+        const tab = panel.requireElementById('tab'+i);
+        const active = i===this.tab;
+        tab.setProperties({borderColor:active?'#ffe651':'#485773',backgroundColor:active?'#ffe651':'#202b40'});
+        tab.traverse(el=>{ if (el instanceof Text) el.setProperties({color:active?'#101320':'#e7f0ff'}); });
+      }
       const routes = proceduresFor(machine);
       const selected = this.tab===2 ? routes[this.route] : undefined;
       const fields = this.tab<2 ? fieldsFor(machine,this.tab) : [];
       const list = this.tab===2 && !selected;
       const count = selected ? selected.steps.length : Math.ceil((list?routes.length:fields.length)/3);
       this.step = Math.max(0,Math.min(this.step,count-1));
-      label(panel,'machine','SENAI X-RAY   /   '+machine.name);
+      label(panel,'machine',machine.name);
+      label(panel,'chapter','FICHA   /   0'+(this.tab+1));
+      label(panel,'page-label',count>1 ? (selected?'ETAPA  ':'PÁGINA  ')+(this.step+1)+' / '+count : '');
+      panel.requireElementById('figure').setProperties({display:machine.photo?'flex':'none'});
       label(panel,'title',selected?.title ?? ['Informações','Diagnóstico simulado','Manutenções'][this.tab]);
       panel.requireElementById('photo').setProperties({src:machine.photo,display:machine.photo?'flex':'none'});
       for (let i=0;i<3;i++) {
@@ -238,7 +244,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
           this.placed.add(catalog[index].id);
           onPlacement(this.placed);
           this.placing = -1;
-          label(marker,'inspect',catalog[index].name + '  /  Abrir informações');
+          label(marker,'marker-action','Abrir informações');
           this.openMenu();
         }
       }

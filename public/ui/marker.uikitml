@@ -1,5 +1,11 @@
 <style>
-.marker { background-color: #101320; border-radius: 16px; border-color: #74e2ed; border-width: 2px; padding: 12px; }
-.name { color: #ffe651; font-size: 22px; }
+  .badge { min-height: 64px; flex-direction: row; align-items: center; gap: 12px; padding: 10px; background-color: #101728; border-width: 2px; border-color: #76dfe4; border-radius: 14px; }
+  .symbol { padding: 8px; background-color: #ffe651; color: #101728; border-radius: 8px; font-size: 21px; }
+  .stack { flex-direction: column; }
+  .name { color: #f7f8ff; font-size: 22px; }
+  .action { color: #83e3e9; font-size: 16px; }
 </style>
-<div><div id="dot" style="display:none;width:16px;height:16px;border-radius:8px;background-color:#ffe651"></div><Button id="inspect" class="marker"><ButtonLabel class="name">Abrir informações</ButtonLabel></Button></div>
+<div>
+  <div id="dot" style="display:none;width:16px;height:16px;border-radius:8px;background-color:#ffe651"></div>
+  <Button id="inspect" class="badge"><div class="symbol">X</div><div class="stack"><div id="marker-name" class="name">Equipamento</div><div id="marker-action" class="action">Abrir informações</div></div></Button>
+</div>

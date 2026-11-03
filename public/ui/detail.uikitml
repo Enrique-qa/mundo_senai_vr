@@ -1,42 +1,50 @@
 <style>
-.root { width: 580px; flex-direction: column; gap: 12px; padding: 20px; border-radius: 22px; background-color: #101320; border-width: 1px; border-color: #435060; }
-.brand { color: #74e2ed; font-size: 16px; }
-.title { color: #ffe651; font-size: 32px; }
-.copy { padding: 14px; background-color: #1a2131; border-radius: 12px; color: #f5f4fa; font-size: 22px; }
-.row { flex-direction: row; gap: 6px; align-items: center; }
-.tab { border-radius: 14px; border-width: 2px; }
-.exit { background-color: #20293b; border-color: #74e2ed; border-width: 1px; }
-.body { flex-direction: row; gap: 14px; }
-.data { flex-direction: column; flex-grow: 1; flex-basis: 0; gap: 6px; }
-.field { flex-direction: column; padding: 8px; border-radius: 8px; background-color: #1a2131; }
-.key { font-size: 16px; color: #8adee6; }
-.value { font-size: 22px; color: #f7f6fa; }
-.photo { width: 175px; height: 175px; border-radius: 14px; border-color: #68747b; border-width: 1px; }
+  .shell { flex-direction: column; width: 660px; padding: 18px; gap: 10px; background-color: #0d1120; border-color: #546079; border-width: 1px; border-radius: 24px; color: #f5f7fb; }
+  .bar { flex-direction: row; justify-content: space-between; align-items: center; gap: 10px; }
+  .brand { font-size: 20px; color: #ffe651; }
+  .tag { color: #88e5ea; font-size: 15px; }
+  .heading { font-size: 34px; color: #fafaff; }
+  .row { flex-direction: row; align-items: center; gap: 8px; }
+  .utility { min-height: 38px; border-radius: 14px; background-color: #1c2537; border-width: 1px; border-color: #46556d; }
+  .choice { min-height: 40px; border-radius: 12px; background-color: #213348; border-width: 1px; border-color: #466179; }
+  .rule { height: 3px; flex-direction: row; }
+  .cool { flex-grow: 2; background-color: #65dbe2; }
+  .warm { flex-grow: 3; background-color: #ffe651; }
+  .rose { flex-grow: 1; background-color: #ec7d9a; }
+  .body { flex-direction: row; gap: 14px; align-items: flex-start; }
+  .data { flex-direction: column; flex-grow: 1; flex-basis: 0; gap: 5px; }
+  .datum { flex-direction: row; align-items: center; padding: 8px; gap: 8px; background-color: #182339; border-radius: 8px; }
+  .key { width: 112px; color: #a7c4d8; font-size: 17px; }
+  .value { flex-grow: 1; flex-basis: 0; font-size: 21px; color: #ffffff; }
+  .copy { padding: 10px; font-size: 20px; color: #ffffff; background-color: #182339; border-radius: 8px; }
+  .figure { flex-direction: column; width: 178px; padding: 8px; gap: 5px; border-radius: 12px; background-color: #202c40; }
+  .photo { width: 162px; max-width: 162px; max-height: 155px; border-radius: 8px; }
+  .tabs { flex-direction: row; gap: 6px; }
+  .tab { flex-grow: 1; min-height: 43px; border-radius: 14px; border-width: 2px; }
 </style>
-<Panel class="root">
-  <div id="machine" class="brand">SENAI X-RAY</div>
-  <div id="title" class="title">Informações</div>
-  <div class="body"><div class="data"><div id="field0" class="field"><div class="key" id="key0">Campo</div><div class="value" id="val0">Valor</div></div><Button id="route0"><ButtonLabel>Procedimento</ButtonLabel></Button>
-<div id="field1" class="field"><div class="key" id="key1">Campo</div><div class="value" id="val1">Valor</div></div><Button id="route1"><ButtonLabel>Procedimento</ButtonLabel></Button>
-<div id="field2" class="field"><div class="key" id="key2">Campo</div><div class="value" id="val2">Valor</div></div><Button id="route2"><ButtonLabel>Procedimento</ButtonLabel></Button>
-    <div id="copy" class="copy">Ficha demonstrativa</div>
-  </div><img id="photo" class="photo" src="/printer-outline.svg" /></div>
-
-  <Button id="routes"><ButtonLabel>Todos os procedimentos</ButtonLabel></Button>
-  <Button id="action0"><ButtonLabel>Resposta A</ButtonLabel></Button>
-  <Button id="action1"><ButtonLabel>Resposta B</ButtonLabel></Button>
-  <div class="row">
-    <Button id="action2"><ButtonLabel>Anterior</ButtonLabel></Button>
-    <Button id="action3"><ButtonLabel>Próximo</ButtonLabel></Button>
+<div class="shell">
+  <div class="bar"><div class="brand">SENAI   /   X-RAY</div><div id="chapter" class="tag">FICHA   /   01</div></div>
+  <div class="rule"><div class="cool"></div><div class="warm"></div><div class="rose"></div></div>
+  <div id="machine" class="tag">Equipamento</div>
+  <div id="title" class="heading">Informações</div>
+  <div class="tabs"><Button id="tab0" class="tab"><ButtonLabel style="color:#eef4ff;font-size:17px">Informações</ButtonLabel></Button>
+    <Button id="tab1" class="tab"><ButtonLabel style="color:#eef4ff;font-size:17px">Diagnóstico</ButtonLabel></Button>
+    <Button id="tab2" class="tab"><ButtonLabel style="color:#eef4ff;font-size:17px">Manutenções</ButtonLabel></Button></div>
+  <div class="body">
+    <div class="data">
+        <div id="field0" class="datum"><div id="key0" class="key">Campo</div><div id="val0" class="value">Valor</div></div>
+        <Button id="route0" class="choice"><ButtonLabel style="color:#eef4ff;font-size:17px">Procedimento</ButtonLabel></Button>
+        <div id="field1" class="datum"><div id="key1" class="key">Campo</div><div id="val1" class="value">Valor</div></div>
+        <Button id="route1" class="choice"><ButtonLabel style="color:#eef4ff;font-size:17px">Procedimento</ButtonLabel></Button>
+        <div id="field2" class="datum"><div id="key2" class="key">Campo</div><div id="val2" class="value">Valor</div></div>
+        <Button id="route2" class="choice"><ButtonLabel style="color:#eef4ff;font-size:17px">Procedimento</ButtonLabel></Button>
+      <div id="copy" class="copy">Conteúdo</div>
+      <Button id="action0" class="choice"><ButtonLabel style="color:#eef4ff;font-size:17px">Resposta A</ButtonLabel></Button>
+      <Button id="action1" class="choice"><ButtonLabel style="color:#eef4ff;font-size:17px">Resposta B</ButtonLabel></Button>
+      <Button id="routes" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Todos os procedimentos</ButtonLabel></Button>
+    </div>
+    <div id="figure" class="figure"><div class="tag">REFERÊNCIA VISUAL</div><img id="photo" class="photo" src="/printer-outline.svg" /></div>
   </div>
-  <div class="row">
-    <Button id="action4"><ButtonLabel>Fechar ficha</ButtonLabel></Button>
-    <Button id="action5"><ButtonLabel>Reposicionar</ButtonLabel></Button>
-  </div>
-  <div class="row">
-    <Button id="tab0" class="tab"><ButtonLabel>Informações</ButtonLabel></Button>
-    <Button id="tab1" class="tab"><ButtonLabel>Diagnóstico</ButtonLabel></Button>
-    <Button id="tab2" class="tab"><ButtonLabel>Manutenções</ButtonLabel></Button>
-  </div>
-  <Button id="exit" class="exit"><ButtonLabel>Voltar ao navegador</ButtonLabel></Button>
-</Panel>
+  <div class="bar"><div class="row"><Button id="action2" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Anterior</ButtonLabel></Button><Button id="action3" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Próximo</ButtonLabel></Button></div><div id="page-label" class="tag">01 / 01</div></div>
+  <div class="bar"><div class="row"><Button id="action4" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Fechar ficha</ButtonLabel></Button><Button id="action5" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Reposicionar</ButtonLabel></Button></div><Button id="exit" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Voltar ao navegador</ButtonLabel></Button></div>
+</div>
