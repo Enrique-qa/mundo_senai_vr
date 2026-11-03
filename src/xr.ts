@@ -3,16 +3,24 @@ import { Text } from '@pmndrs/uikit';
 import options from 'virtual:iwsdk-project';
 import { stationText, type Equipment } from './equipment';
 
-function label(asset: UIKitMLAsset, id: string, value: string) {
-  const text = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  asset.requireElementById(id).traverse(el => { if (el instanceof Text) el.setProperties({text}); });
+const fontFamilies = { Barlow: { 600: import.meta.env.BASE_URL + 'fonts/barlow-pt.json' } };
+function styleText(asset: UIKitMLAsset) {
+  asset.traverse(el => {
+    if (el instanceof Text) el.setProperties({fontFamily: 'Barlow', fontFamilies, fontWeight: 600});
+  });
 }
 
-export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet<string>) => void) {
+function label(asset: UIKitMLAsset, id: string, value: string) {
+  asset.requireElementById(id).traverse(el => { if (el instanceof Text) el.setProperties({text: value.normalize('NFC')}); });
+}
+
+export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet<string>) => void, onExit: () => void) {
   const world = await World.create(document.querySelector<HTMLDivElement>('#scene-container')!, options);
   const panel = world.requireSceneObject<UIKitMLAsset>('detail');
   panel.visible = false;
   const menu = await world.assets.instantiate<UIKitMLAsset>('placement');
+  styleText(panel);
+  styleText(menu);
   menu.scale.copy(panel.scale);
   world.createTransformEntity(menu).addComponent(RayInteractable);
   menu.visible = false;
@@ -26,7 +34,8 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       world.createTransformEntity(marker).addComponent(RayInteractable);
     }
     marker.visible = false;
-    label(marker, 'inspect', machine.name + '  /  Abrir informacoes');
+    styleText(marker);
+    label(marker, 'inspect', machine.name + '  /  Abrir informações');
     markers.push(marker);
   }
   let operator = false;
@@ -37,6 +46,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
     private page = 0;
     private previousPosition = new Vector3();
     private placementReady = false;
+    private scanning = false;
     private session: XRSession | null = null;
     private tab = 0;
     private step = 0;
@@ -52,6 +62,18 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         el.addEventListener('click', fn);
         this.cleanupFuncs.push(() => el.removeEventListener('click', fn));
       };
+      listen(menu,'exit',()=>{ if (menu.visible) world.exitXR(); });
+      listen(panel,'exit',()=>{ if (panel.visible) world.exitXR(); });
+      listen(menu,'scan',async ()=>{
+        const session = world.session;
+        if (!menu.visible || this.placed.size || this.scanning || !session?.initiateRoomCapture) return;
+        this.scanning = true;
+        try {
+          await session.initiateRoomCapture();
+        } catch {
+          if (world.session === session) label(menu,'scan','Tentar novamente ou usar Espaço físico no Quest');
+        } finally { this.scanning = false; }
+      });
       for (let slot = 0; slot < 3; slot++) listen(menu,'slot'+slot, () => {
         const index = this.page*3+slot;
         if (menu.visible && index < catalog.length && performance.now() >= this.openAfter) this.beginPlacement(index);
@@ -98,7 +120,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       if (this.placing >= 0) {
         const i = this.placing;
         markers[i].position.copy(this.previousPosition);
-        label(markers[i],'inspect',catalog[i].name + '  /  Abrir informacoes');
+        label(markers[i],'inspect',catalog[i].name + '  /  Abrir informações');
         this.placing = -1;
       }
       for (const marker of markers) marker.visible = false;
@@ -111,7 +133,11 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
     }
     private renderMenu() {
       const pages = Math.ceil(catalog.length/3);
-      label(menu,'summary',this.placed.size+' de '+catalog.length+' posicionadas  /  Pag. '+(this.page+1)+' de '+pages);
+      const session = world.session;
+      const canScan = !this.placed.size && typeof session?.initiateRoomCapture === 'function'
+        && (!session.enabledFeatures || session.enabledFeatures.includes('plane-detection'));
+      menu.requireElementById('scan').setProperties({display:canScan?'flex':'none'});
+      label(menu,'summary',this.placed.size+' de '+catalog.length+' posicionadas  /  Pág. '+(this.page+1)+' de '+pages);
       for (let slot=0;slot<3;slot++) {
         const item = catalog[this.page*3+slot];
         menu.requireElementById('slot'+slot).setProperties({display:item?'flex':'none'});
@@ -123,6 +149,10 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
     }
     private renderPanel() {
       const machine = catalog[this.selected];
+      for (let i=0;i<3;i++) panel.requireElementById('tab'+i).setProperties({
+        borderColor: i===this.tab ? '#ffe651' : '#435060',
+        backgroundColor: i===this.tab ? '#38321b' : '#1a2131'
+      });
       label(panel,'title',machine.name);
       label(panel,'copy',stationText(machine,this.tab,this.step,this.feedback));
       const show = [this.tab===1 && !!machine.quiz,this.tab===1 && !!machine.quiz,this.tab===2 && this.step>0,this.tab===2 && this.step<machine.steps.length-1,true,operator];
@@ -141,6 +171,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         if (session) session.addEventListener('end', () => {
           this.placed.clear();
           onPlacement(this.placed);
+          onExit();
         }, {once:true});
         this.placing = -1;
         markers.forEach((marker,i) => {
@@ -154,8 +185,9 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         if (session && operator) this.openMenu();
       }
       if (!session) return;
-      if (operator && this.input.xr.gamepads.right?.getButtonDown(InputComponent.B_Button)) {
-        this.openMenu();
+      if (this.input.xr.gamepads.right?.getButtonDown(InputComponent.B_Button)) {
+        if (operator) this.openMenu();
+        else world.exitXR();
         return;
       }
       this.player.head.getWorldPosition(this.head);
@@ -172,7 +204,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
           this.placed.add(catalog[index].id);
           onPlacement(this.placed);
           this.placing = -1;
-          label(marker,'inspect',catalog[index].name + '  /  Abrir informacoes');
+          label(marker,'inspect',catalog[index].name + '  /  Abrir informações');
           this.openMenu();
         }
       }
@@ -181,5 +213,8 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
     }
   }
   world.registerSystem(Station);
-  return (admin: boolean) => { operator = admin; world.launchXR(); };
+  return (admin: boolean) => {
+    operator = admin;
+    world.launchXR(admin ? {features:{planeDetection:{required:false}}} : undefined);
+  };
 }

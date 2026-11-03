@@ -1,2 +1,5 @@
-<Button id="inspect"><ButtonLabel>Equipamento</ButtonLabel></Button>
-
+<style>
+.marker { background-color: #101320; border-radius: 16px; border-color: #74e2ed; border-width: 2px; padding: 12px; }
+.name { color: #ffe651; font-size: 22px; }
+</style>
+<Button id="inspect" class="marker"><ButtonLabel class="name">Abrir informações</ButtonLabel></Button>

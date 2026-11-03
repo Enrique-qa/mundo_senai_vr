@@ -26,6 +26,13 @@ Defina **Build Command** como `npm ci --include=dev && npm run typecheck && npm 
 Clique em **Create Static Site**. Quando aparecer **Live**, abra a URL HTTPS indicada
 no navegador do Quest e siga o teste abaixo.
 
+## Área física e saída no Quest
+Configure o limite em escala de sala (Roomscale) para o percurso livre entre as máquinas. No menu do administrador, **Escanear ambiente** aparece antes do primeiro posicionamento quando o navegador disponibiliza captura de sala. Se o botão estiver ausente, use **Espaço físico** nas configurações do Quest. Capturar a sala e ajustar o limite são operações distintas.
+
+**Voltar ao navegador** encerra a sessão pelo menu de preparação ou pela ficha. Durante o posicionamento, **B** retorna ao menu. Na entrada direta de visitante, **B** encerra a sessão. As posições precisam de nova calibração na próxima entrada.
+
+Os textos imersivos usam o atlas local Barlow SemiBold com glifos portugueses. A licença OFL acompanha a fonte em `public/fonts/`.
+
 ## Teste de campo
 1. Use **Gerenciar máquinas** para cadastrar as fichas no próprio Quest. Abra **Posicionar no ambiente** no navegador do Quest. Autorize a sessão. Confirme que vê a sala pela câmera e que a placa “Impressora 3D” acompanha a mira do controle direito.
 2. Selecione uma máquina na lista paginada. Confira o estado **A posicionar** ou **Posicionada** e o total preparado. Mire na marca física escolhida para essa máquina. Ajuste a distância com o analógico direito e confirme com o gatilho. Mova a cabeça lateralmente e confira se a placa ficou no ponto escolhido.

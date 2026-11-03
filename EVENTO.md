@@ -10,3 +10,4 @@
 
 **Plano B** — Se o Quest perder a sessão, reabra e recalibre. Se a rede, a permissão ou o rastreamento impedir a demonstração, use a página já aberta no computador e selecione Explorar em 2D. Apresente as mesmas três abas em 2D.
 
+Antes de calibrar, configure no Quest o limite em escala de sala que abrange o percurso entre os equipamentos. Voltar ao navegador encerra a sessão e exige reposicionar as placas na próxima entrada.

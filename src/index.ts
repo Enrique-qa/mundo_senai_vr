@@ -60,7 +60,10 @@ async function start() {
     return;
   }
   const { setup } = await import('./xr');
-  const launch = await setup(catalog, showPlacement);
+  const launch = await setup(catalog, showPlacement, () => {
+    status.textContent = 'Você voltou ao navegador. As fichas estão salvas. Para uma nova visita, posicione as placas novamente.';
+    button('admin').focus();
+  });
   for (const id of ['admin','visitor']) {
     button(id).disabled = false;
     button(id).onclick = () => {
@@ -68,7 +71,7 @@ async function start() {
       launch(id === 'admin');
     };
   }
-  status.textContent = 'Em Posicionar no ambiente, escolha a máquina na lista, alinhe a placa e confirme com o gatilho direito. Selecione Iniciar visita para entregar o visor. O botão B do controle direito reabre a lista. O acesso direto de visitante distribui as placas em posições de demonstração.';
+  status.textContent = 'Em Posicionar no ambiente, escolha a máquina na lista, alinhe a placa e confirme com o gatilho direito. Selecione Iniciar visita para entregar o visor. No administrador, B reabre a lista. No modo visitante direto, B volta ao navegador. O acesso direto de visitante distribui as placas em posições de demonstração.';
 }
 start().catch(() => { status.textContent = 'Não foi possível iniciar a cena. Verifique HTTPS e o acesso à rede ou use Explorar em 2D.'; });
 

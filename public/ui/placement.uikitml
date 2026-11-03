@@ -1,19 +1,24 @@
 <style>
-.root { width: 480px; padding: 18px; gap: 9px; flex-direction: column; background-color: #141825; }
-.caption { font-size: 18px; color: #80e2eb; }
-.title { font-size: 26px; color: #ffda50; }
+.root { width: 500px; flex-direction: column; gap: 12px; padding: 20px; border-radius: 22px; background-color: #101320; border-width: 1px; border-color: #435060; }
+.brand { color: #74e2ed; font-size: 16px; }
+.title { color: #ffe651; font-size: 32px; }
+.caption { color: #f5f4fa; font-size: 20px; }
 .row { flex-direction: row; gap: 8px; }
+.item { background-color: #1a2131; border-radius: 12px; }
+.exit { background-color: #20293b; border-color: #74e2ed; border-width: 1px; }
 </style>
 <Panel class="root">
-<div class="title">Preparar o ambiente</div>
-<div id="summary" class="caption">Maquinas cadastradas</div>
-<div>Selecione uma maquina para posicionar ou ajustar.</div>
-<Button id="slot0"><ButtonLabel>Maquina</ButtonLabel></Button>
-<Button id="slot1"><ButtonLabel>Maquina</ButtonLabel></Button>
-<Button id="slot2"><ButtonLabel>Maquina</ButtonLabel></Button>
-<div class="row">
-<Button id="prev"><ButtonLabel>Anterior</ButtonLabel></Button>
-<Button id="next"><ButtonLabel>Proxima</ButtonLabel></Button>
-</div>
-<Button id="visit"><ButtonLabel>Iniciar visita</ButtonLabel></Button>
+  <div class="brand">SENAI X-RAY   /   ADMINISTRAÇÃO</div>
+  <div class="title">Preparar o ambiente</div>
+  <div id="summary" class="caption">Máquinas cadastradas</div>
+  <Button id="scan" class="exit"><ButtonLabel>Escanear ambiente</ButtonLabel></Button>
+  <Button id="slot0" class="item"><ButtonLabel>Máquina</ButtonLabel></Button>
+  <Button id="slot1" class="item"><ButtonLabel>Máquina</ButtonLabel></Button>
+  <Button id="slot2" class="item"><ButtonLabel>Máquina</ButtonLabel></Button>
+  <div class="row">
+    <Button id="prev"><ButtonLabel>Anterior</ButtonLabel></Button>
+    <Button id="next"><ButtonLabel>Próxima</ButtonLabel></Button>
+  </div>
+  <Button id="visit"><ButtonLabel>Iniciar visita</ButtonLabel></Button>
+  <Button id="exit" class="exit"><ButtonLabel>Voltar ao navegador</ButtonLabel></Button>
 </Panel>
