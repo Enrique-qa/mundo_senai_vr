@@ -1,5 +1,7 @@
 # IWSDK project
 
+Ao concluir cada tarefa que altere o projeto, faça um commit das mudanças da tarefa e informe o hash.
+
 A Vite + TypeScript or JavaScript app, but several things do **not** work the way
 a normal Vite project works. Read this section before assuming anything.
 

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 285" fill="none">
+ <defs>
+  <pattern id="grid" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M18 0H0V18" stroke="#9de0e5" stroke-opacity=".09"/></pattern>
+  <pattern id="layers" width="6" height="4" patternUnits="userSpaceOnUse"><rect width="6" height="4" fill="#815e23"/><path d="M0 1h6" stroke="#ffe651"/></pattern>
+ </defs>
+ <rect width="450" height="285" fill="url(#grid)"/>
+ <g stroke="#8be0e6" stroke-linejoin="round" stroke-width="2">
+  <path fill="#183641" d="m72 211 171 31 91-47-169-28z"/><path fill="#192e3b" d="M72 211v15l171 33v-17zm171 31 91-47v16l-91 48z"/>
+  <path fill="#244150" d="M104 207V60l12-6 175 29v141l-12 6V94L117 67v142z"/>
+  <path d="m104 60 175 30 12-7m-12 7v140m-159-37V81m151 131V104"/>
+  <path fill="#162e3b" d="m112 120 165 29v10l-165-29z"/>
+  <path fill="#46616b" d="m110 187 135 24 54-27-135-23z"/>
+  <path fill="url(#layers)" stroke="#ffe651" d="m179 179 35 6 22-11v-23l-35-5-22 10z"/><path d="m179 156 35 6 22-11m-22 11v23" stroke="#ffe651"/>
+  <path fill="#213646" stroke="#ffe651" d="m192 122 23 4v21l-8 8-7-10-8-2z"/>
+  <path d="M205 123c-1-21 20-32 9-51s-32-13-38-22" stroke="#ffe651"/>
+  <g transform="translate(165 46) rotate(-13)"><ellipse rx="26" ry="34" fill="#223b49"/><ellipse cx="6" rx="23" ry="33" fill="#152b36"/><ellipse cx="6" rx="17" ry="25" stroke="#ffe651"/><ellipse cx="6" rx="11" ry="18" stroke="#ffe651"/><ellipse cx="6" rx="5" ry="9"/></g>
+ </g>
+ <g stroke="#9eafc1" stroke-width="1"><path d="M190 38h81l15-15h27M217 135h88l17-19h16M285 193h44l12 12h15"/></g>
+ <g fill="#d2e7ee" font-family="monospace" font-size="10"><text x="317" y="26">CARRETEL</text><text x="341" y="119">EXTRUSOR</text><text x="360" y="208">MESA</text></g>
+</svg>

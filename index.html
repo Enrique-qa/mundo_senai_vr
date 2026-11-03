@@ -1,3 +1,52 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SENAI X-Ray | Estação 01</title><style>
-*{box-sizing:border-box}body{margin:0;background:#101d29;color:#f3f6fa;font:18px/1.5 system-ui}main{max-width:680px;margin:9vh auto;padding:30px}small{color:#ffdc50;letter-spacing:.12em}h1{font-size:clamp(40px,8vw,76px);margin:.2em 0}button{background:#223c53;color:white;border:1px solid #62849c;border-radius:8px;padding:12px;margin:4px;font:inherit;cursor:pointer}button:disabled{opacity:.5}article{border-left:3px solid #ffdc50;padding:0 16px}#scene-container{position:fixed;inset:0;z-index:-1}body{isolation:isolate}main{background:#101d29;position:relative;border-radius:12px}#scene-container canvas{width:100%;height:100%}
-</style></head><body><div id="scene-container"></div><main><small>LABORATÓRIO EDUCACIONAL · ESTAÇÃO 01</small><h1>SENAI X-Ray</h1><p>Explore uma impressora 3D em uma inspeção simulada.</p><button id="admin" disabled>Modo administrador</button><button id="visitor" disabled>Modo visitante</button><button id="preview">Prévia desktop</button><p id="status" role="status">Verificando realidade mista…</p><article id="sample" hidden></article></main><script type="module" src="/src/index.ts"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b0d17">
+  <title>SENAI X-Ray | Laboratório de realidade mista</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div id="scene-container"></div>
+  <div class="shell">
+    <header>
+      <div class="brand"><img src="/senai.png" alt="SENAI"><span>X-RAY</span></div>
+      <span class="edition">LABORATÓRIO DE REALIDADE MISTA</span>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="headline">
+        <div class="intro">
+          <span class="eyebrow">MUNDO SENAI &nbsp; / &nbsp; LABORATÓRIO</span>
+          <h1 id="headline">Explore o<br><em>laboratório.</em></h1>
+          <p class="lead">Escolha um equipamento para consultar sua ficha técnica, interpretar leituras simuladas e percorrer uma manutenção guiada.</p>
+          <div class="actions"><button id="visitor" class="accent" disabled>Modo visitante <span aria-hidden="true">↗</span></button><button id="preview">Prévia desktop <span aria-hidden="true">→</span></button></div>
+          <button class="operator" id="admin" disabled>Posicionar no ambiente</button>
+        </div>
+        <figure class="catalog">
+          <div class="plate"><span>X-RAY</span> CATÁLOGO DE EQUIPAMENTOS</div>
+          <div class="catalog-body"><label for="machines">Escolha uma máquina</label>
+          <select id="machines"></select>
+          <p>A prévia mostra a ficha selecionada. No Quest, cada marcador abre a ficha da máquina correspondente.</p>
+          <button id="manage">Gerenciar máquinas</button></div>
+        </figure>
+      </section>
+      <p id="status" role="status">Verificando realidade mista…</p>
+      <form id="editor" hidden>
+        <h2>Cadastro de máquinas</h2><p>Salvo neste navegador. Para o evento, configure o catálogo no Quest.</p>
+        <label>Ficha para editar<select id="edit-machine"><option value="">Nova máquina</option></select></label>
+        <label>Nome da máquina<input name="name" required maxlength="70"></label>
+        <label>Ficha técnica<textarea name="info" placeholder="Modelo, série e especificações"></textarea></label>
+        <label>Leituras simuladas<textarea name="readings" placeholder="Uma leitura por linha, com sua unidade"></textarea></label>
+        <label>Manutenção simulada<input name="procedure" placeholder="Nome do procedimento"></label>
+        <label>Etapas do roteiro<textarea name="steps" placeholder="Uma etapa por linha"></textarea></label>
+        <button type="submit">Salvar máquina</button> <button id="remove" type="button" hidden>Excluir máquina</button> <button type="button" id="cancel">Fechar</button>
+        <p id="edit-status" role="status"></p>
+      </form>
+      <article id="sample" hidden tabindex="-1"></article>
+    </main>
+    <footer><b>SENAI X-RAY</b><span>Inspeção educacional simulada</span></footer>
+  </div>
+  <script type="module" src="/src/index.ts"></script>
+</body>
+</html>

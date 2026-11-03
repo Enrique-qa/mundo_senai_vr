@@ -1,15 +1,17 @@
 <style>
-.root { width: 490px; padding: 18px; gap: 9px; flex-direction: column; }
+.root { width: 490px; padding: 20px; gap: 10px; flex-direction: column; background-color: #141825; }
+.eyebrow { font-size: 15px; color: #80e2eb; }
 .title { font-size: 28px; color: #ffda50; }
 .copy { font-size: 22px; color: #ffffff; }
 .row { flex-direction: row; gap: 6px; }
 </style>
 <Panel class="root">
-<div class="title">01  /  Impressora 3D</div>
+<div class="eyebrow">SENAI X-RAY  /  EQUIPAMENTO</div>
+<div id="title" class="title">Equipamento</div>
 <div class="row"><Button id="tab0"><ButtonLabel>Informacoes</ButtonLabel></Button><Button id="tab1"><ButtonLabel>Diagnostico</ButtonLabel></Button><Button id="tab2"><ButtonLabel>Manutencao</ButtonLabel></Button></div>
 <div id="copy" class="copy">Conteudo demonstrativo</div>
-<Button id="action0"><ButtonLabel>Faltou filamento</ButtonLabel></Button>
-<Button id="action1"><ButtonLabel>A peca mudou de cor</ButtonLabel></Button>
+<Button id="action0"><ButtonLabel>Resposta A</ButtonLabel></Button>
+<Button id="action1"><ButtonLabel>Resposta B</ButtonLabel></Button>
 <Button id="action2"><ButtonLabel>Anterior</ButtonLabel></Button>
 <Button id="action3"><ButtonLabel>Proximo</ButtonLabel></Button>
 <Button id="action4"><ButtonLabel>Fechar</ButtonLabel></Button>
