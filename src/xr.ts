@@ -47,9 +47,10 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
     private setCompact(index: number, compact: boolean) {
       if (this.compact[index] === compact) return;
       this.compact[index] = compact;
-      markers[index].requireElementById('inspect').setProperties({display:compact?'none':'flex'});
-      markers[index].requireElementById('dot').setProperties({display:compact?'flex':'none'});
+      markers[index].requireElementById('caption').setProperties({display:compact?'none':'flex'});
     }
+    private hovering = markers.map(()=>new Set<number>());
+    private near = markers.map(()=>true);
     private placing = -1;
     private placed = new Set<string>();
     private page = 0;
@@ -90,18 +91,31 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       listen(menu,'prev',()=>{ if (menu.visible && this.page>0) { this.page--; this.renderMenu(); } });
       listen(menu,'next',()=>{ if (menu.visible && (this.page+1)*3<catalog.length) { this.page++; this.renderMenu(); } });
       listen(menu,'visit',()=>{ if (menu.visible && this.placed.size) { menu.visible = false; this.showMarkers(); } });
+      markers.forEach((marker,index) => {
+        const button = marker.requireElementById('inspect');
+        const pointers = this.hovering[index];
+        const enter = (event: {pointerId:number}) => { pointers.add(event.pointerId); };
+        const leave = (event: {pointerId:number}) => { pointers.delete(event.pointerId); };
+        button.addEventListener('pointerenter',enter);
+        button.addEventListener('pointerleave',leave);
+        this.cleanupFuncs.push(()=>{
+          button.removeEventListener('pointerenter',enter);
+          button.removeEventListener('pointerleave',leave);
+        });
+      });
       markers.forEach((marker,index) => listen(marker, 'inspect', () => {
-        if (!world.session || this.placing !== -1 || this.compact[index] || !marker.visible || performance.now() < this.openAfter) return;
+        if (!world.session || this.placing !== -1 || !marker.visible || performance.now() < this.openAfter) return;
         this.selected = index;
         this.tab = this.step = 0; this.route = -1;
         this.feedback = '';
         panel.position.copy(marker.position);
         panel.position.y += 0.22;
+        for (const pointers of this.hovering) pointers.clear();
         for (const item of markers) item.visible = false;
         panel.visible = true;
         this.renderPanel();
       }));
-      for (let i=0;i<3;i++) listen(panel, 'tab'+i, () => { if (catalog[this.selected].kind==='part' && i!==0) return; this.tab = i; this.step = 0; this.route = -1; this.renderPanel(); });
+      for (let i=0;i<3;i++) listen(panel, 'tab'+i, () => { if (catalog[this.selected].kind==='part' && i===2) return; this.tab = i; this.step = 0; this.route = -1; this.renderPanel(); });
       for (let i=0;i<3;i++) listen(panel,'route'+i,()=>{
         this.route = this.step*3+i; this.step = 0; this.renderPanel();
       });
@@ -134,7 +148,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       if (this.placing >= 0) {
         const i = this.placing;
         markers[i].position.copy(this.previousPosition);
-        label(markers[i],'marker-action','Abrir informações');
+        label(markers[i],'marker-action','Visualizar');
         this.placing = -1;
       }
       for (const marker of markers) marker.visible = false;
@@ -166,7 +180,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       for (let i=0;i<3;i++) {
         const tab = panel.requireElementById('tab'+i);
         const active = i===this.tab;
-        tab.setProperties({display:machine.kind==='part' && i>0?'none':'flex',
+        tab.setProperties({display:machine.kind==='part' && i===2?'none':'flex',
           borderColor:active?'#ffe36a':'#93accc',backgroundColor:active?'#403619':'#182638'});
         tab.traverse(el=>{ if (el instanceof Text) el.setProperties({color:active?'#fff39b':'#ffffff'}); });
       }
@@ -190,7 +204,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         panel.requireElementById('route'+i).setProperties({display:route?'flex':'none'});
         if (route) label(panel,'route'+i,route.title);
       }
-      const question = this.tab===1 && machine.quiz;
+      const question = this.tab===1 && machine.kind!=='part' && machine.quiz;
       const copy = selected ? 'Etapa '+(this.step+1)+' de '+count+'\n'+selected.steps[this.step]
         : question ? this.feedback || question.question : !count ? 'Nenhum conteúdo cadastrado nesta seção.' : '';
       panel.requireElementById('copy').setProperties({display:copy?'flex':'none'});
@@ -216,6 +230,8 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         }, {once:true});
         this.placing = -1;
         markers.forEach((marker,i) => {
+          this.hovering[i].clear();
+          this.near[i] = true;
           marker.visible = !!session && !operator;
           if (session && !operator) {
             const angle = i * Math.PI * 2 / markers.length;
@@ -245,7 +261,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
           this.placed.add(catalog[index].id);
           onPlacement(this.placed);
           this.placing = -1;
-          label(marker,'marker-action','Abrir informações');
+          label(marker,'marker-action','Visualizar');
           this.openMenu();
         }
       }
@@ -254,7 +270,8 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         if (!marker.visible) continue;
         if (this.placing < 0) {
           const distance = marker.position.distanceToSquared(this.head);
-          this.setCompact(i, distance > (this.compact[i] ? 2.5**2 : 3**2));
+          this.near[i] = distance <= (this.near[i] ? 3**2 : 2.5**2);
+          this.setCompact(i, !this.near[i] && !this.hovering[i].size);
         }
         marker.lookAt(this.head);
       }

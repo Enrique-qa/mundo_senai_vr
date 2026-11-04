@@ -1,7 +1,7 @@
-import { saveCatalog, proceduresFor, kindLabel, type Equipment, type Procedure } from './equipment';
+import { saveCatalog, legacyStatus, operatingStatus, proceduresFor, kindLabel, type Equipment, type Procedure } from './equipment';
 
 type Pair = [string, string];
-const metrics = ['Temperatura', 'Velocidade', 'Pressão', 'Tensão', 'Corrente', 'Potência', 'Vibração', 'Status', 'Problema'];
+const metrics = ['Temperatura', 'Velocidade', 'Pressão', 'Tensão', 'Corrente', 'Potência', 'Vibração', 'Problema'];
 const hints = ['Ex.: 42 °C', 'Ex.: 800 rpm', 'Ex.: 6 bar', 'Ex.: 220 V', 'Ex.: 2 A', 'Ex.: 500 W', 'Ex.: 3 mm/s'];
 
 function legacyPairs(raw: string, readings: boolean): Pair[] {
@@ -46,15 +46,16 @@ export function setupWizard(catalog: Equipment[]) {
 
   function show(index: number, focus = true) {
     const part = kind.value === 'part';
-    page = part ? 0 : index;
+    page = part ? Math.min(index,1) : index;
+    get('machine-diagnostics').hidden = part;
     pages.forEach((section, i) => { section.hidden = i !== page; });
     navigation.forEach((button,i) => {
-      button.closest('li')!.hidden = part && i>0;
+      button.closest('li')!.hidden = part && i>1;
       if (i === page) button.setAttribute('aria-current','step');
       else button.removeAttribute('aria-current');
     });
     get('back').hidden = page === 0;
-    get('advance').textContent = part ? 'Salvar peça' : page === 2 ? 'Salvar máquina' : 'Continuar';
+    get('advance').textContent = part && page===1 ? 'Salvar peça' : page === 2 ? 'Salvar máquina' : 'Continuar';
     if (focus) pages[page].querySelector('h3')?.focus();
   }
 
@@ -168,6 +169,7 @@ export function setupWizard(catalog: Equipment[]) {
   function load() {
     current = catalog.find(item => item.id === selector.value);
     kind.value = current?.kind ?? 'machine';
+    get<HTMLSelectElement>('operating-status').value = operatingStatus(current);
     name.value = current?.name ?? '';
     procedures.replaceChildren(); specs.replaceChildren(); readings.replaceChildren();
     for (const p of current ? proceduresFor(current) : []) addProcedure(p);
@@ -180,10 +182,9 @@ export function setupWizard(catalog: Equipment[]) {
     }
     get<HTMLDetailsElement>('quiz-editor').open = !!current?.quiz;
     for (const pair of legacyPairs(current?.info ?? '',false)) addPair(specs,pair);
-    if (current?.diagnosticFields) {
-      for (const {key,value} of current.diagnosticFields) addPair(readings,[key,value]);
-    } else {
-      for (const pair of legacyPairs(current?.readings ?? '',true)) addPair(readings,pair);
+    const diagnostics = current?.diagnosticFields ?? legacyPairs(current?.readings ?? '',true).map(([key,value])=>({key,value}));
+    for (const field of diagnostics) {
+      if (!legacyStatus(field)) addPair(readings,[field.key.trim().toLowerCase()==='status' ? 'Observação de status' : field.key,field.value]);
     }
     if (!specs.childElementCount) addPair(specs);
     if (!readings.childElementCount) addPair(readings);
@@ -204,11 +205,14 @@ export function setupWizard(catalog: Equipment[]) {
     let target: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null = null;
     let message = '';
     if (page === 0 && !name.value.trim()) { target = name; message = 'Informe o nome do item.'; }
-    if (!target && page < 2) {
+    if (!target && (page === 0 || (page === 1 && kind.value !== 'part'))) {
       const list = page === 0 ? specs : readings;
       for (const {row,key,value} of pairs(list)) {
         // Legacy notes without a label remain editable and round-trip verbatim.
         const legacyNote = row.hasAttribute('data-note');
+        if (page === 1 && key.trim().toLowerCase() === 'status') {
+          target = row.querySelector('.pair-key'); message = 'Use o seletor Status de operação ou escolha outro rótulo.'; break;
+        }
         if (key && !value) { target = row.querySelector('.pair-value'); message = 'Informe o valor ou remova esta linha.'; break; }
         if (!key && value && !legacyNote) {
           const select = row.querySelector('select');
@@ -217,7 +221,7 @@ export function setupWizard(catalog: Equipment[]) {
         }
       }
     }
-    if (page===1 && !target) {
+    if (page===1 && kind.value !== 'part' && !target) {
       const inputs = ['question','choice0','reply0','choice1','reply1'].map(id=>get<HTMLInputElement>(id));
       if (inputs.some(input=>input.value.trim())) {
         target = inputs.find(input=>!input.value.trim()) ?? null;
@@ -267,7 +271,7 @@ export function setupWizard(catalog: Equipment[]) {
   form.onsubmit = event => {
     event.preventDefault();
     // Direct navigation allows incomplete drafts. Validate all steps before saving.
-    const last = kind.value === 'part' ? 0 : 2;
+    const last = kind.value === 'part' ? 1 : 2;
     if (page === last) {
       for (let i = 0; i <= last; i++) {
         show(i, false);
@@ -285,6 +289,7 @@ export function setupWizard(catalog: Equipment[]) {
       feedback:[0,1].map(i=>get<HTMLInputElement>('reply'+i).value.trim()) } : undefined;
     const machine: Equipment = { ...current, id: current?.id ?? crypto.randomUUID(), name: name.value.trim(),
       kind: kind.value === 'part' ? 'part' : 'machine',
+      operatingStatus: get<HTMLSelectElement>('operating-status').value === 'Inativo' ? 'Inativo' : 'Ativo',
       diagnosticFields: pairs(readings).filter(p=>p.value).map(({key,value})=>({key,value})),
       quiz, info: lines(specs), readings: lines(readings), photo, procedures: routes, procedure: routes[0]?.title ?? '',
       steps: routes[0]?.steps ?? [] };

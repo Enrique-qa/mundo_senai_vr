@@ -33,7 +33,7 @@ function preview(tab = 0, feedback = '', route = -1) {
   function control(parent: HTMLElement, title: string, fn: () => void) {
     const el = document.createElement('button'); el.textContent = title; el.onclick = fn; parent.append(el); return el;
   }
-  const tabs = machine.kind === 'part' ? ['Informações'] : ['Informações','Diagnóstico','Manutenções'];
+  const tabs = machine.kind === 'part' ? ['Informações','Diagnóstico'] : ['Informações','Diagnóstico','Manutenções'];
   const routes = proceduresFor(machine);
   const selected = routes[route];
   text(sample,'small',kindLabel(machine).toUpperCase()+'   /   '+machine.name);
@@ -53,7 +53,7 @@ function preview(tab = 0, feedback = '', route = -1) {
       text(cell,'dt',f.key); text(cell,'dd',f.value);
     }
     if (!fields.length) text(content,'p','Nenhuma informação cadastrada nesta seção.');
-    if (tab === 1 && machine.quiz) {
+    if (tab === 1 && machine.kind !== 'part' && machine.quiz) {
       text(content,'p',feedback || machine.quiz.question);
       machine.quiz.choices.forEach((choice,i)=>control(content,choice,()=>preview(1,machine.quiz!.feedback[i])));
     }

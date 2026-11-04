@@ -1,6 +1,7 @@
 export interface Procedure { title: string; steps: string[] }
 export interface Equipment {
   kind?: 'machine' | 'part';
+  operatingStatus?: 'Ativo' | 'Inativo';
   diagnosticFields?: {key:string; value:string}[];
   id: string;
   name: string;
@@ -43,10 +44,27 @@ export function proceduresFor(machine: Equipment): Procedure[] {
   return machine.procedures ?? (machine.steps.length ? [{title: machine.procedure || 'Procedimento', steps: machine.steps}] : []);
 }
 
-export function fieldsFor(machine: Equipment, tab: number) {
+function savedFields(machine: Equipment, tab: number) {
   if (tab === 1 && machine.diagnosticFields) return machine.diagnosticFields;
   return (tab === 0 ? machine.info.split('\n') : machine.readings.split(/\n| \| /)).filter(Boolean).map(line => {
     const colon = line.indexOf(':');
     return colon < 0 ? {key:'Observação',value:line} : {key:line.slice(0,colon),value:line.slice(colon+1).trim()};
   });
+}
+
+export function legacyStatus(field: {key:string; value:string}) {
+  return field.key.trim().toLowerCase() === 'status' && /^(ativo|inativo)$/i.test(field.value.trim());
+}
+export function operatingStatus(machine?: Equipment) {
+  if (machine?.operatingStatus) return machine.operatingStatus;
+  const previous = machine && savedFields(machine,1).find(legacyStatus);
+  return previous?.value.trim().toLowerCase() === 'inativo' ? 'Inativo' : 'Ativo';
+}
+export function fieldsFor(machine: Equipment, tab: number) {
+  if (tab !== 1) return savedFields(machine,tab);
+  const status = {key:'Status',value:operatingStatus(machine)};
+  if (machine.kind === 'part') return [status];
+  const readings = savedFields(machine,1).filter(field=>!legacyStatus(field)).map(field=>
+    field.key.trim().toLowerCase() === 'status' ? {...field,key:'Observação de status'} : field);
+  return [status,...readings];
 }

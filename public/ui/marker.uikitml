@@ -6,6 +6,5 @@
   .action { color: #83e3e9; font-size: 16px; }
 </style>
 <div>
-  <div id="dot" style="display:none;width:16px;height:16px;border-radius:8px;background-color:#ffe651"></div>
-  <Button id="inspect" class="badge"><div class="symbol">X</div><div class="stack"><div id="marker-name" class="name">Equipamento</div><div id="marker-action" class="action">Abrir informações</div></div></Button>
+  <Button id="inspect" class="badge"><div class="symbol">&gt;</div><div id="caption" class="stack"><div id="marker-name" class="name">Equipamento</div><div id="marker-action" class="action">Visualizar</div></div></Button>
 </div>

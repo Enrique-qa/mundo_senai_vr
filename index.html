@@ -52,14 +52,15 @@
         </section>
         <section class="wizard-page" hidden>
           <h3 tabindex="-1">Diagnóstico</h3>
-          <p>Escolha uma leitura ou crie um campo com seu próprio rótulo e valor. Por exemplo, Defeito — Queima de capacitor.</p>
+          <label>Status de operação<select id="operating-status"><option>Ativo</option><option>Inativo</option></select></label>
+          <div id="machine-diagnostics"><p>Escolha uma leitura ou crie um campo com seu próprio rótulo e valor. Por exemplo, Defeito — Queima de capacitor.</p>
           <div id="metric-list"></div>
           <button type="button" id="add-metric">＋ Adicionar leitura</button> <button id="add-custom" type="button">＋ Campo personalizado</button>
           <details id="quiz-editor"><summary>Pergunta de diagnóstico (opcional)</summary>
             <label>Pergunta<input id="question"></label>
             <label>Alternativa A<input id="choice0"></label><label>Comentário da alternativa A<input id="reply0"></label>
             <label>Alternativa B<input id="choice1"></label><label>Comentário da alternativa B<input id="reply1"></label>
-          </details>
+          </details></div>
         </section>
         <section class="wizard-page" hidden>
           <h3 tabindex="-1">Manutenção</h3>

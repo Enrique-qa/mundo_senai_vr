@@ -57,4 +57,4 @@ Os textos imersivos usam o atlas local Barlow SemiBold com glifos portugueses. A
 
 ## Fichas e distância de leitura
 Em **Gerenciar máquinas**, inclua uma foto opcional, pares de especificação e valor, diagnóstico simulado e procedimentos com suas próprias etapas. A pergunta de diagnóstico também pode ser editada ou removida. A foto é reduzida no navegador e salva com a ficha neste dispositivo.
-Na visita, a seção **Manutenções** abre a lista de procedimentos. No Quest, as especificações, leituras e listas longas são paginadas. Ao se afastar mais de 3 m, o botão dá lugar a um ponto amarelo; ao voltar a menos de 2,5 m, o nome e a seleção reaparecem. O posicionamento pelo administrador mantém a identificação visível.
+Na visita, a seção **Manutenções** abre a lista de procedimentos. No Quest, as especificações, leituras e listas longas são paginadas. A mais de 3 m, o marcador mostra apenas a seta. Aponte para ela ou aproxime-se a até 2,5 m para ver o nome e “Visualizar”. Clique para abrir a ficha. Em Diagnóstico, máquinas e peças exibem o status de operação cadastrado, Ativo ou Inativo. O posicionamento pelo administrador mantém a identificação visível.
