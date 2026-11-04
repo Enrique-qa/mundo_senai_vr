@@ -62,6 +62,8 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
     private step = 0;
     private feedback = '';
     private distance = 1.1;
+    private nearControl = false;
+    private shownCentimeters = -1;
     private head = new Vector3();
     private point = new Vector3();
     private openAfter = 0;
@@ -142,7 +144,8 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       this.placementReady = false;
       menu.visible = panel.visible = false;
       markers.forEach((m,i)=>{ m.visible = i===index; });
-      label(markers[index],'marker-action','Gatilho para fixar   /   B para cancelar');
+      this.nearControl = false;
+      this.shownCentimeters = -1;
     }
     private openMenu() {
       if (this.placing >= 0) {
@@ -250,10 +253,21 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       this.player.head.getWorldPosition(this.head);
       if (this.placing >= 0) {
         const pad = this.input.xr.gamepads.right;
-        const axes = pad?.getAxesValues(InputComponent.Thumbstick);
-        this.distance = Math.max(0.55,Math.min(2.4,this.distance-(axes?.y ?? 0)*delta));
+        if (pad?.getButtonDown(InputComponent.A_Button)) this.nearControl = !this.nearControl;
+        if (!this.nearControl) {
+          const axes = pad?.getAxesValues(InputComponent.Thumbstick);
+          this.distance = Math.max(0.55,Math.min(2.4,this.distance-(axes?.y ?? 0)*delta));
+        }
+        const offset = this.nearControl ? 0.08 : this.distance;
         const marker = markers[this.placing];
-        marker.position.copy(this.player.raySpaces.right.localToWorld(this.point.set(0,0,-this.distance)));
+        marker.position.copy(this.player.raySpaces.right.localToWorld(this.point.set(0,0,-offset)));
+        const centimeters = Math.round(offset*100);
+        if (centimeters !== this.shownCentimeters) {
+          this.shownCentimeters = centimeters;
+          label(marker,'marker-action',this.nearControl
+            ? 'Junto ao controle (8 cm) · A: voltar à mira\nGatilho: fixar · B: cancelar'
+            : centimeters+' cm do controle · Analógico: ajustar\nA: junto ao controle · Gatilho: fixar · B: cancelar');
+        }
         if (pad && !pad.getButtonPressed(InputComponent.Trigger)) this.placementReady = true;
         if (this.placementReady && pad?.getButtonDown(InputComponent.Trigger)) {
           this.openAfter = performance.now()+450;
