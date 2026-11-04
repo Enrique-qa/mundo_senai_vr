@@ -1,13 +1,13 @@
 <style>
-  .shell { flex-direction: column; width: 660px; padding: 18px; gap: 10px; background-color: #0d1120; border-color: #546079; border-width: 1px; border-radius: 24px; color: #f5f7fb; }
+  .shell { flex-direction: column; width: 600px; padding: 14px; gap: 7px; background-color: #0d1120; border-color: #546079; border-width: 1px; border-radius: 24px; color: #f5f7fb; }
   .bar { flex-direction: row; justify-content: space-between; align-items: center; gap: 10px; }
-  .brand { font-size: 20px; color: #ffe651; }
+  .brand { font-size: 15px; color: #ffe651; }
   .tag { color: #88e5ea; font-size: 15px; }
-  .heading { font-size: 34px; color: #fafaff; }
+  .heading { font-size: 30px; color: #fafaff; }
   .row { flex-direction: row; align-items: center; gap: 8px; }
   .utility { min-height: 38px; border-radius: 14px; background-color: #1c2537; border-width: 1px; border-color: #46556d; }
   .choice { min-height: 40px; border-radius: 12px; background-color: #213348; border-width: 1px; border-color: #466179; }
-  .rule { height: 3px; flex-direction: row; }
+  .rule { height: 2px; flex-direction: row; }
   .cool { flex-grow: 2; background-color: #65dbe2; }
   .warm { flex-grow: 3; background-color: #ffe651; }
   .rose { flex-grow: 1; background-color: #ec7d9a; }
@@ -25,11 +25,11 @@
 <div class="shell">
   <div class="bar"><div class="brand">SENAI   /   X-RAY</div><div id="chapter" class="tag">FICHA   /   01</div></div>
   <div class="rule"><div class="cool"></div><div class="warm"></div><div class="rose"></div></div>
-  <div id="machine" class="tag">Equipamento</div>
-  <div id="title" class="heading">Informações</div>
+  <div id="machine" class="heading">Equipamento</div>
   <div class="tabs"><Button id="tab0" class="tab"><ButtonLabel style="color:#ffffff;font-size:20px">Informações</ButtonLabel></Button>
     <Button id="tab1" class="tab"><ButtonLabel style="color:#ffffff;font-size:20px">Diagnóstico</ButtonLabel></Button>
     <Button id="tab2" class="tab"><ButtonLabel style="color:#ffffff;font-size:20px">Manutenções</ButtonLabel></Button></div>
+  <div id="title" style="display:none;font-size:21px;color:#e0eafa">Procedimento</div>
   <div class="body">
     <div class="data">
         <div id="field0" class="datum"><div id="key0" class="key">Campo</div><div id="val0" class="value">Valor</div></div>
@@ -43,8 +43,8 @@
       <Button id="action1" class="choice"><ButtonLabel style="color:#eef4ff;font-size:17px">Resposta B</ButtonLabel></Button>
       <Button id="routes" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Todos os procedimentos</ButtonLabel></Button>
     </div>
-    <div id="figure" class="figure"><div class="tag">REFERÊNCIA VISUAL</div><img id="photo" class="photo" src="/printer-outline.svg" /></div>
+    <div id="figure" class="figure"><img id="photo" class="photo" src="/printer-outline.svg" /></div>
   </div>
-  <div class="bar"><div class="row"><Button id="action2" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Anterior</ButtonLabel></Button><Button id="action3" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Próximo</ButtonLabel></Button></div><div id="page-label" class="tag">01 / 01</div></div>
+  <div id="pagination" class="bar"><div class="row"><Button id="action2" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Anterior</ButtonLabel></Button><Button id="action3" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Próximo</ButtonLabel></Button></div><div id="page-label" class="tag">01 / 01</div></div>
   <div class="bar"><div class="row"><Button id="action4" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Fechar ficha</ButtonLabel></Button><Button id="action5" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Reposicionar</ButtonLabel></Button></div><Button id="exit" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Voltar ao navegador</ButtonLabel></Button></div>
 </div>

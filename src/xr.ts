@@ -194,10 +194,12 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       const count = selected ? selected.steps.length : Math.ceil((list?routes.length:fields.length)/3);
       this.step = Math.max(0,Math.min(this.step,count-1));
       label(panel,'machine',machine.name);
-      label(panel,'chapter',kindLabel(machine).toUpperCase()+'   /   0'+(this.tab+1));
+      label(panel,'chapter',kindLabel(machine).toUpperCase());
       label(panel,'page-label',count>1 ? (selected?'ETAPA  ':'PÁGINA  ')+(this.step+1)+' / '+count : '');
       panel.requireElementById('figure').setProperties({display:machine.photo?'flex':'none'});
-      label(panel,'title',selected?.title ?? ['Informações','Diagnóstico simulado','Manutenções'][this.tab]);
+      panel.requireElementById('title').setProperties({display:selected?'flex':'none'});
+      if (selected) label(panel,'title',selected.title);
+      panel.requireElementById('pagination').setProperties({display:count>1?'flex':'none'});
       panel.requireElementById('photo').setProperties({src:machine.photo,display:machine.photo?'flex':'none'});
       for (let i=0;i<3;i++) {
         const field = fields[this.step*3+i];
@@ -265,8 +267,8 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         if (centimeters !== this.shownCentimeters) {
           this.shownCentimeters = centimeters;
           label(marker,'marker-action',this.nearControl
-            ? 'Junto ao controle (8 cm) · A: voltar à mira\nGatilho: fixar · B: cancelar'
-            : centimeters+' cm do controle · Analógico: ajustar\nA: junto ao controle · Gatilho: fixar · B: cancelar');
+            ? 'Junto ao controle · 8 cm\nA: voltar à mira\nGatilho: fixar · B: cancelar'
+            : centimeters+' cm do controle\nAnalógico: ajustar distância · A: trazer para a mão\nGatilho: fixar · B: cancelar');
         }
         if (pad && !pad.getButtonPressed(InputComponent.Trigger)) this.placementReady = true;
         if (this.placementReady && pad?.getButtonDown(InputComponent.Trigger)) {

@@ -11,7 +11,11 @@
   .cool { flex-grow: 2; background-color: #65dbe2; }
   .warm { flex-grow: 3; background-color: #ffe651; }
   .rose { flex-grow: 1; background-color: #ec7d9a; }
-  .shell { width: 510px; }
+  .shell { width: 510px; gap: 7px; }
+  .guide { flex-direction: column; padding: 9px; gap: 3px; background-color: #182339; border-radius: 10px; }
+  .instruction { flex-direction: row; gap: 8px; }
+  .control { width: 94px; font-size: 17px; color: #ffe894; }
+  .hint { flex-grow: 1; flex-basis: 0; font-size: 17px; color: #f5f7fb; }
   .summary { background-color: #1b2c40; color: #a6eff1; border-radius: 10px; padding: 10px; font-size: 19px; }
   .item { min-height: 44px; background-color: #1b263b; border-radius: 12px; border-width: 1px; border-color: #475670; justify-content: flex-start; }
   .visit { background-color: #35494d; border-radius: 14px; border-color: #85e4e7; border-width: 2px; }
@@ -21,6 +25,12 @@
   <div class="rule"><div class="cool"></div><div class="warm"></div><div class="rose"></div></div>
   <div class="heading">Preparar o laboratório</div>
   <div id="summary" class="summary">Máquinas cadastradas</div>
+  <div class="guide"><div class="tag">CONTROLE DIREITO</div>
+    <div class="instruction"><div class="control">Gatilho</div><div class="hint">Seleciona o item e confirma a posição.</div></div>
+    <div class="instruction"><div class="control">Analógico</div><div class="hint">Para cima ou para baixo, ajusta a distância da mira.</div></div>
+    <div class="instruction"><div class="control">A</div><div class="hint">Alterna entre a mira e a posição junto à mão.</div></div>
+    <div class="instruction"><div class="control">B</div><div class="hint">Cancela o ajuste e volta à lista.</div></div>
+  </div>
   <div class="tag">SELECIONE UMA MÁQUINA OU PEÇA</div>
   <Button id="slot0" class="item"><ButtonLabel style="color:#eef4ff;font-size:17px">Máquina</ButtonLabel></Button>
   <Button id="slot1" class="item"><ButtonLabel style="color:#eef4ff;font-size:17px">Máquina</ButtonLabel></Button>
