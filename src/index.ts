@@ -81,7 +81,7 @@ async function start() {
   }
   const { setup } = await import('./xr');
   const launch = await setup(catalog, showPlacement, () => {
-    status.textContent = 'Você voltou ao navegador. As fichas estão salvas. Para uma nova visita, posicione as placas novamente.';
+    status.textContent = 'Você voltou ao navegador. As fichas estão salvas. Para uma nova visita, use Restaurar posições no administrador.';
     button('admin').focus();
   });
   for (const id of ['admin','visitor']) {

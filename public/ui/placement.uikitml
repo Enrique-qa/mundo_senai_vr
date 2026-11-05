@@ -36,5 +36,7 @@
   <Button id="slot1" class="item"><ButtonLabel style="color:#eef4ff;font-size:17px">Máquina</ButtonLabel></Button>
   <Button id="slot2" class="item"><ButtonLabel style="color:#eef4ff;font-size:17px">Máquina</ButtonLabel></Button>
   <div class="bar"><div class="row"><Button id="prev" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Anterior</ButtonLabel></Button><Button id="next" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Próxima</ButtonLabel></Button></div><Button id="scan" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Escanear ambiente</ButtonLabel></Button></div>
+  <div class="bar"><Button id="save" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Salvar posições</ButtonLabel></Button><Button id="restore" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Restaurar posições</ButtonLabel></Button></div>
+  <div id="save-status" class="hint">Ao restaurar, alinhe os mesmos pontos de até dois itens e confirme com o gatilho.</div>
   <div class="bar"><Button id="visit" class="visit"><ButtonLabel style="color:#eef4ff;font-size:17px">Iniciar visita</ButtonLabel></Button><Button id="exit" class="utility"><ButtonLabel style="color:#eef4ff;font-size:17px">Voltar ao navegador</ButtonLabel></Button></div>
 </div>

@@ -1,8 +1,8 @@
 <style>
-  .badge { min-height: 64px; flex-direction: row; align-items: center; gap: 12px; padding: 10px; background-color: #101728; border-width: 2px; border-color: #76dfe4; border-radius: 14px; }
+  .badge { min-height: 56px; flex-direction: row; align-items: center; gap: 8px; padding: 8px; background-color: #101728; border-width: 2px; border-color: #76dfe4; border-radius: 14px; }
   .symbol { padding: 8px; background-color: #ffe651; color: #101728; border-radius: 8px; font-size: 21px; }
-  .stack { flex-direction: column; }
-  .name { color: #f7f8ff; font-size: 22px; }
+  .stack { flex-direction: column; width: 270px; gap: 3px; }
+  .name { color: #f7f8ff; font-size: 20px; }
   .action { color: #83e3e9; font-size: 16px; }
 </style>
 <div>

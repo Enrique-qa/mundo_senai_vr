@@ -14,29 +14,118 @@ export interface Equipment {
   quiz?: { question: string; choices: string[]; feedback: string[] };
 }
 
-const demo: Equipment = {
-  photo: '/printer-outline.svg',
-  id: 'demo-fdm', name: 'Impressora 3D (exemplo)',
-  info: 'Modelo: Lab FDM-01\nNº de série: DEMO-3D-001\nVolume útil: 220 x 220 x 250 mm\nBico: 0,4 mm\nFilamento: PLA de 1,75 mm',
-  readings: 'Bico: 205 °C | Mesa: 60 °C\nMovimento: 50 mm/s | Filamento: 0 g',
-  quiz: {
-    question: 'O cabeçote se move, mas a camada parou de crescer. Qual leitura explica a falha?',
-    choices: ['Faltou filamento', 'A peça mudou de cor'],
-    feedback: ['Correto. O carretel vazio impede a formação de novas camadas.', 'Observe a massa de filamento restante.']
+const initialCatalog: Equipment[] = [
+  {
+    "operatingStatus": "Inativo",
+    "readings": "Defeito simulado: Bico parcialmente obstruído, causando extrusão irregular.",
+    "procedure": "",
+    "steps": [],
+    "id": "bambu-a1",
+    "kind": "machine",
+    "name": "Bambu Lab A1",
+    "info": "Tipo: Impressora 3D\nFabricante: Bambu Lab\nModelo: A1",
+    "diagnosticFields": [
+      {
+        "key": "Defeito simulado",
+        "value": "Bico parcialmente obstruído, causando extrusão irregular."
+      }
+    ]
   },
-  procedure: 'Reposição simulada de filamento',
-  steps: ['Identifique o carretel vazio pela leitura de 0 g.', 'Consulte na ficha o filamento compatível.', 'Após a reposição simulada, confira a massa disponível e a formação da camada de teste.']
-};
+  {
+    "operatingStatus": "Inativo",
+    "readings": "",
+    "procedure": "",
+    "steps": [],
+    "id": "fonte-kp517",
+    "kind": "part",
+    "name": "Fonte de computador KP-517",
+    "info": "Modelo: KP-517\nPotência informada: 200 W\nTipo: Fonte de computador"
+  },
+  {
+    "operatingStatus": "Inativo",
+    "readings": "",
+    "procedure": "",
+    "steps": [],
+    "id": "watercooler-corsair",
+    "kind": "part",
+    "name": "Watercooler Corsair",
+    "info": "Fabricante: Corsair\nModelo: A confirmar\nTipo: Sistema de refrigeração líquida"
+  },
+  {
+    "operatingStatus": "Inativo",
+    "readings": "",
+    "procedure": "",
+    "steps": [],
+    "id": "positivo-pih77cm",
+    "kind": "part",
+    "name": "Placa-mãe Positivo POS-PIH77CM",
+    "info": "Fabricante: Positivo\nModelo: POS-PIH77CM\nSoquete: LGA1155\nMemória compatível: DDR3\nChipset: Intel H77"
+  },
+  {
+    "operatingStatus": "Inativo",
+    "readings": "",
+    "procedure": "",
+    "steps": [],
+    "id": "ram-4gb-ddr3",
+    "kind": "part",
+    "name": "Memória RAM 4 GB",
+    "info": "Capacidade: 4 GB\nPadrão: DDR3 (confirmar na etiqueta)\nPlaca de referência: Positivo POS-PIH77CM\nFabricante e frequência: A confirmar"
+  },
+  {
+    "operatingStatus": "Inativo",
+    "readings": "",
+    "procedure": "",
+    "steps": [],
+    "id": "notebook-la6901p",
+    "kind": "part",
+    "name": "Placa-mãe de notebook P5WEO LA-6901P",
+    "info": "Identificação informada: P5WEO LA-6901P (a confirmar)\nTipo: Placa-mãe de notebook\nSoquete e memória: A confirmar"
+  },
+  {
+    "operatingStatus": "Inativo",
+    "readings": "",
+    "procedure": "",
+    "steps": [],
+    "id": "notebook-mv0s",
+    "kind": "part",
+    "name": "Placa-mãe de notebook TPTS MV-0S",
+    "info": "Inscrição informada: TPTS MV-0S 94V-0 (a confirmar)\nModelo: A confirmar\nTipo: Placa-mãe de notebook\nSoquete e memória: A confirmar"
+  },
+  {
+    "operatingStatus": "Inativo",
+    "readings": "",
+    "procedure": "",
+    "steps": [],
+    "id": "ams-lite",
+    "kind": "part",
+    "name": "Bambu Lab AMS lite",
+    "info": "Fabricante: Bambu Lab\nModelo: AMS lite\nEquipamento associado: Bambu Lab A1\nTipo: Acessório de alimentação de filamento"
+  },
+  {
+    "operatingStatus": "Inativo",
+    "readings": "",
+    "procedure": "",
+    "steps": [],
+    "id": "cooler-notebook",
+    "kind": "part",
+    "name": "Cooler de processador de notebook",
+    "info": "Tipo: Cooler de processador de notebook\nFabricante e modelo: A confirmar\nCompatibilidade: A confirmar"
+  }
+];
 
-const key = 'senai-xray.catalog.v1';
+const key = 'senai-xray.catalog.v2';
 export function loadCatalog(): Equipment[] {
   try {
     const saved = localStorage.getItem(key);
-    if (saved === null) return [demo];
+    if (saved === null) {
+      saveCatalog(initialCatalog);
+      localStorage.removeItem('senai-xray.catalog.v1');
+      return initialCatalog;
+    }
     const data = JSON.parse(saved);
     if (Array.isArray(data) && data.every(item => item && ['id','name','info','readings','procedure'].every(k => typeof item[k] === 'string') && Array.isArray(item.steps) && item.steps.every((s: unknown) => typeof s === 'string') && (!item.quiz || (typeof item.quiz.question === 'string' && Array.isArray(item.quiz.choices) && Array.isArray(item.quiz.feedback))))) return data;
   } catch { /* Storage can be unavailable in a private session. */ }
-  return [demo];
+  return initialCatalog;
 }
 export function saveCatalog(items: Equipment[]) { localStorage.setItem(key, JSON.stringify(items)); }
 export function kindLabel(item: Equipment) { return item.kind === 'part' ? 'Peça' : 'Máquina'; }

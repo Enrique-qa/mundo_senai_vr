@@ -2,6 +2,7 @@ import { World, createSystem, UIKitMLAsset, InputComponent, RayInteractable, Vec
 import { Text } from '@pmndrs/uikit';
 import options from 'virtual:iwsdk-project';
 import { fieldsFor, kindLabel, proceduresFor, type Equipment } from './equipment';
+import { loadPositions, savePositions, type SavedPoint } from './placements';
 
 const fontFamilies = { Barlow: { 600: import.meta.env.BASE_URL + 'fonts/barlow-pt.json' } };
 function styleText(asset: UIKitMLAsset) {
@@ -19,7 +20,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
   const panel = world.requireSceneObject<UIKitMLAsset>('detail');
   panel.visible = false;
   const menu = await world.assets.instantiate<UIKitMLAsset>('placement');
-  panel.scale.multiplyScalar(0.80);
+  panel.scale.multiplyScalar(0.48);
   styleText(panel);
   styleText(menu);
   menu.scale.copy(panel.scale);
@@ -35,6 +36,7 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       world.createTransformEntity(marker).addComponent(RayInteractable);
     }
     marker.visible = false;
+    if (!markers.length) marker.scale.multiplyScalar(0.8);
     styleText(marker);
     label(marker, 'marker-name', machine.name);
     markers.push(marker);
@@ -53,6 +55,10 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
     private near = markers.map(()=>true);
     private placing = -1;
     private placed = new Set<string>();
+    private saved = loadPositions().filter(point=>catalog.some(item=>item.id===point.id));
+    private restoring: SavedPoint[] = [];
+    private firstReference = new Vector3();
+    private referenceStep = 0;
     private page = 0;
     private previousPosition = new Vector3();
     private placementReady = false;
@@ -71,10 +77,38 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
     init() {
       const listen = (asset: UIKitMLAsset, id: string, fn: () => void) => {
         const el = asset.requireElementById(id);
+        el.setProperties({
+          hover: {backgroundColor:'#263d56',borderColor:'#83e3e9'},
+          active: {backgroundColor:'#163040',borderColor:'#ffe36a'},
+        });
         el.addEventListener('click', fn);
         this.cleanupFuncs.push(() => el.removeEventListener('click', fn));
       };
       listen(menu,'exit',()=>{ if (menu.visible) world.exitXR(); });
+      listen(menu,'save',()=> {
+        if (!menu.visible || !this.placed.size) return;
+        const points = catalog.flatMap((item,i)=>this.placed.has(item.id)
+          ? [{id:item.id,position:markers[i].position.toArray() as [number,number,number]}] : []);
+        try {
+          savePositions(points);
+          this.saved = points;
+          label(menu,'save-status','Posições salvas neste navegador. Restaure alinhando as referências.');
+          this.renderMenu();
+        } catch { label(menu,'save-status','Não foi possível salvar. Tente novamente.'); }
+      });
+      listen(menu,'restore',()=> {
+        if (!menu.visible || !this.saved.length) return;
+        const first = this.saved[0];
+        const second = this.saved.slice(1).find(point=>Math.hypot(
+          point.position[0]-first.position[0],point.position[2]-first.position[2])>=0.3);
+        if (this.saved.length>1 && !second) {
+          label(menu,'save-status','As referências precisam estar separadas por pelo menos 30 cm. Reposicione e salve.');
+          return;
+        }
+        this.restoring = second ? [first,second] : [first];
+        this.referenceStep = 0;
+        this.beginPlacement(catalog.findIndex(item=>item.id===first.id));
+      });
       listen(panel,'exit',()=>{ if (panel.visible) world.exitXR(); });
       listen(menu,'scan',async ()=>{
         const session = world.session;
@@ -146,14 +180,18 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       markers.forEach((m,i)=>{ m.visible = i===index; });
       this.nearControl = false;
       this.shownCentimeters = -1;
+      label(markers[index],'marker-name',(this.restoring.length
+        ? 'Alinhe '+(this.referenceStep+1)+'/'+this.restoring.length+' · ' : '')+catalog[index].name);
     }
     private openMenu() {
       if (this.placing >= 0) {
         const i = this.placing;
         markers[i].position.copy(this.previousPosition);
         label(markers[i],'marker-action','Visualizar');
+        label(markers[i],'marker-name',catalog[i].name);
         this.placing = -1;
       }
+      this.restoring = [];
       for (const marker of markers) marker.visible = false;
       panel.visible = false;
       menu.position.copy(this.player.head.localToWorld(this.point.set(0,0,-1.25)));
@@ -177,6 +215,51 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
       menu.requireElementById('prev').setProperties({display:this.page>0?'flex':'none'});
       menu.requireElementById('next').setProperties({display:this.page+1<pages?'flex':'none'});
       menu.requireElementById('visit').setProperties({display:this.placed.size?'flex':'none'});
+      menu.requireElementById('save').setProperties({display:this.placed.size?'flex':'none'});
+      menu.requireElementById('restore').setProperties({display:this.saved.length?'flex':'none'});
+    }
+    private confirmReference() {
+      const index = this.placing;
+      const marker = markers[index];
+      const destination = marker.position.clone();
+      marker.position.copy(this.previousPosition);
+      label(marker,'marker-name',catalog[index].name);
+      label(marker,'marker-action','Visualizar');
+      if (this.referenceStep===0) {
+        this.firstReference.copy(destination);
+        if (this.restoring.length>1) {
+          this.referenceStep = 1;
+          this.beginPlacement(catalog.findIndex(item=>item.id===this.restoring[1].id));
+          return;
+        }
+      }
+      const origin = this.restoring[0].position;
+      let angle = 0;
+      if (this.restoring.length>1) {
+        const second = this.restoring[1].position;
+        const oldX = second[0]-origin[0], oldZ = second[2]-origin[2];
+        const newX = destination.x-this.firstReference.x, newZ = destination.z-this.firstReference.z;
+        const expected = Math.hypot(oldX,oldZ);
+        if (Math.abs(Math.hypot(newX,newZ)-expected)>Math.max(0.2,expected*0.2)) {
+          label(marker,'marker-name','Confira o ponto de referência · '+catalog[index].name);
+          this.placementReady = false;
+          return;
+        }
+        angle = Math.atan2(newZ,newX)-Math.atan2(oldZ,oldX);
+      }
+      const cosine = Math.cos(angle), sine = Math.sin(angle);
+      this.placed.clear();
+      for (const point of this.saved) {
+        const i = catalog.findIndex(item=>item.id===point.id);
+        const x = point.position[0]-origin[0], z = point.position[2]-origin[2];
+        markers[i].position.set(this.firstReference.x+x*cosine-z*sine,
+          this.firstReference.y+point.position[1]-origin[1],this.firstReference.z+x*sine+z*cosine);
+        this.placed.add(point.id);
+      }
+      this.placing = -1;
+      onPlacement(this.placed);
+      label(menu,'save-status','Posições restauradas. Confira os marcadores antes de iniciar a visita.');
+      this.openMenu();
     }
     private renderPanel() {
       const machine = catalog[this.selected];
@@ -234,9 +317,12 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
           onExit();
         }, {once:true});
         this.placing = -1;
+        this.restoring = [];
         markers.forEach((marker,i) => {
           this.hovering[i].clear();
           this.near[i] = true;
+          label(marker,'marker-name',catalog[i].name);
+          label(marker,'marker-action','Visualizar');
           marker.visible = !!session && !operator;
           if (session && !operator) {
             const angle = i * Math.PI * 2 / markers.length;
@@ -273,10 +359,15 @@ export async function setup(catalog: Equipment[], onPlacement: (ids: ReadonlySet
         if (pad && !pad.getButtonPressed(InputComponent.Trigger)) this.placementReady = true;
         if (this.placementReady && pad?.getButtonDown(InputComponent.Trigger)) {
           this.openAfter = performance.now()+450;
+          if (this.restoring.length) {
+            this.confirmReference();
+            return;
+          }
           const index = this.placing;
           this.placed.add(catalog[index].id);
           onPlacement(this.placed);
           this.placing = -1;
+          label(menu,'save-status','Posição ajustada. Use Salvar posições para guardar a disposição.');
           label(marker,'marker-action','Visualizar');
           this.openMenu();
         }
